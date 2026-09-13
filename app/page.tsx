@@ -1,69 +1,166 @@
 import Image from "next/image";
+import Link from "next/link";
+import { FadeIn } from "@/components/FadeIn";
+import { GoldParticles } from "@/components/GoldParticles";
+import { Stars } from "@/components/Stars";
+import { DotGrid } from "@/components/DotGrid";
+import { CyclingPhrase } from "@/components/CyclingPhrase";
+import { SkylineSilhouette } from "@/components/SkylineSilhouette";
+import { CountdownTimer } from "@/components/CountdownTimer";
+import { TokenomicsChart } from "@/components/TokenomicsChart";
+import { currentHunt } from "@/content/current-hunt";
+
+const STEPS = [
+  {
+    n: "01",
+    title: "FOLLOW THE CLUES",
+    body: "Every Monday we drop a new clue pointing somewhere in NYC. Follow it, decode it, narrow it down.",
+  },
+  {
+    n: "02",
+    title: "FIND THE COIN",
+    body: "Somewhere in the city, a physical Scavenger Coin is waiting. Track it down before anyone else does.",
+  },
+  {
+    n: "03",
+    title: "CLAIM YOUR $SCAV",
+    body: "Scan the QR code on the coin, connect your wallet, and your SCAV lands on-chain in seconds.",
+  },
+] as const;
+
+const MINT_ADDRESS = "BGuhyvwuV1z6hGCPHVShrDBwHDypQvnQPvsR1RDHrA3j";
+
+const SOCIALS = [
+  { label: "X", href: "https://x.com/ScavengerCoin" },
+  { label: "TikTok", href: "https://tiktok.com/@ScavengerCoin" },
+  { label: "Instagram", href: "https://instagram.com/ScavengerCoin" },
+] as const;
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <main className="flex-1 bg-[#0A0A0A] text-[#F0EDE8]">
+      {/* HERO */}
+      <section className="relative flex min-h-[100svh] flex-col items-center justify-center overflow-hidden px-6 text-center">
+        <DotGrid />
+        <Stars />
+        <div
+          aria-hidden
+          className="gold-glow absolute left-1/2 top-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#F5C518] blur-[100px] sm:h-96 sm:w-96"
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
+        <GoldParticles />
+
+        <div className="relative z-10 flex flex-col items-center gap-6">
+          <Image
+            src="/scav-logo.jpg"
+            alt="Scavenger Coin logo"
+            width={110}
+            height={110}
+            className="rounded-full border border-[#2A2A2A]"
+            priority
+          />
+          <h1 className="font-display text-6xl leading-none text-[#F0EDE8] sm:text-8xl">
+            THE HUNT IS ON
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="max-w-md text-balance text-base text-[#F0EDE8]/60 sm:max-w-xl sm:text-lg">
+            Every week, a physical Scavenger Coin is hidden somewhere in NYC.{" "}
+            <CyclingPhrase />
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href="/claim"
+            className="mt-2 rounded-full bg-[#F5C518] px-8 py-3.5 text-sm font-semibold tracking-wide text-[#0A0A0A] transition hover:brightness-110 active:scale-[0.98] sm:text-base"
           >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            Found a coin? Claim here
+          </Link>
         </div>
-      </main>
-    </div>
+
+        <SkylineSilhouette />
+      </section>
+
+      {/* HOW IT WORKS */}
+      <FadeIn>
+        <section className="mx-auto max-w-5xl px-6 py-20 sm:py-28">
+          <h2 className="font-display mb-12 text-center text-4xl text-[#F0EDE8] sm:text-5xl">
+            HOW IT WORKS
+          </h2>
+          <div className="grid gap-5 sm:grid-cols-3">
+            {STEPS.map((step) => (
+              <div
+                key={step.n}
+                className="rounded-xl border border-[#2A2A2A] bg-[#141414] p-6"
+              >
+                <div className="font-display mb-4 text-4xl text-[#F5C518]">{step.n}</div>
+                <h3 className="mb-2 text-sm font-semibold tracking-wide text-[#F0EDE8]">
+                  {step.title}
+                </h3>
+                <p className="text-sm leading-relaxed text-[#F0EDE8]/60">{step.body}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      </FadeIn>
+
+      {/* CURRENT HUNT — mission dossier */}
+      <FadeIn>
+        <section className="mx-auto max-w-3xl px-6 py-20 sm:py-28">
+          <div className="rounded-2xl border border-[#2A2A2A] bg-[#141414] p-6 sm:p-10">
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-dashed border-[#2A2A2A] pb-6">
+              <span className="inline-flex items-center gap-2 rounded-full border border-[#F5C518]/30 bg-[#F5C518]/10 px-3 py-1 text-xs font-semibold tracking-widest text-[#F5C518]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#F5C518]" />
+                {currentHunt.status}
+              </span>
+              <span className="font-mono text-xs tracking-widest text-[#F0EDE8]/40">
+                CASE FILE — WEEK {String(currentHunt.weekNumber).padStart(2, "0")}
+              </span>
+            </div>
+
+            <p className="mb-2 text-xs uppercase tracking-widest text-[#F0EDE8]/40">
+              Current clue
+            </p>
+            <p className="font-display mb-8 text-2xl leading-tight text-[#F0EDE8] sm:text-3xl">
+              &ldquo;{currentHunt.clue}&rdquo;
+            </p>
+
+            <p className="mb-3 text-xs uppercase tracking-widest text-[#F0EDE8]/40">
+              Next clue drops in
+            </p>
+            <CountdownTimer />
+          </div>
+        </section>
+      </FadeIn>
+
+      {/* TOKENOMICS */}
+      <FadeIn>
+        <section className="mx-auto max-w-3xl px-6 py-20 sm:py-28">
+          <h2 className="font-display mb-2 text-center text-4xl text-[#F0EDE8] sm:text-5xl">
+            TOKENOMICS
+          </h2>
+          <p className="mb-10 text-center text-sm text-[#F0EDE8]/40">
+            1,000,000,000 $SCAV total supply
+          </p>
+          <TokenomicsChart />
+        </section>
+      </FadeIn>
+
+      {/* FOOTER */}
+      <footer className="border-t border-[#2A2A2A] px-6 py-10">
+        <div className="mx-auto flex max-w-3xl flex-col items-center gap-4 text-center">
+          <div className="flex gap-6">
+            {SOCIALS.map((s) => (
+              <a
+                key={s.label}
+                href={s.href}
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs font-medium tracking-widest text-[#F0EDE8]/50 transition hover:text-[#F5C518]"
+              >
+                {s.label}
+              </a>
+            ))}
+          </div>
+          <p className="break-all font-mono text-[11px] text-[#F0EDE8]/30">{MINT_ADDRESS}</p>
+          <p className="text-[11px] tracking-widest text-[#F0EDE8]/30">NYC.EST 2025</p>
+        </div>
+      </footer>
+    </main>
   );
 }
