@@ -158,6 +158,12 @@ export default function Home() {
             ))}
           </div>
           <p className="break-all font-mono text-[11px] text-[#F0EDE8]/30">{MINT_ADDRESS}</p>
+          <a
+            href="mailto:support@scavengercoin.com"
+            className="text-xs text-[#F0EDE8]/40 transition hover:text-[#F5C518]"
+          >
+            Contact us: support@scavengercoin.com
+          </a>
           <p className="text-[11px] tracking-widest text-[#F0EDE8]/30">NYC.EST 2025</p>
         </div>
       </footer>

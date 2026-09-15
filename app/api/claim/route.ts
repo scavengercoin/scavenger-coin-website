@@ -3,8 +3,10 @@ import { PublicKey } from "@solana/web3.js";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { payoutScav } from "@/lib/solana";
 import { sendClaimNotification } from "@/lib/email";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
-const DEFAULT_REWARD = 1000; // SCAV per find, used when a coin row has no explicit reward_amount
+// Half now, half after the finder's social post is verified via the admin bonus payout.
+const DEFAULT_REWARD = 500;
 
 function logAttempt(
   supabase: ReturnType<typeof getSupabaseAdmin>,
@@ -19,6 +21,11 @@ function logAttempt(
 }
 
 export async function GET(req: NextRequest) {
+  const allowed = await checkRateLimit(getClientIp(req));
+  if (!allowed) {
+    return NextResponse.json({ error: "Too many requests, please slow down" }, { status: 429 });
+  }
+
   const code = req.nextUrl.searchParams.get("code")?.trim();
   if (!code) {
     return NextResponse.json({ error: "Missing code" }, { status: 400 });
@@ -48,6 +55,11 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const allowed = await checkRateLimit(getClientIp(req));
+  if (!allowed) {
+    return NextResponse.json({ error: "Too many requests, please slow down" }, { status: 429 });
+  }
+
   let body: { code?: string; wallet?: string };
   try {
     body = await req.json();
@@ -61,6 +73,9 @@ export async function POST(req: NextRequest) {
 
   if (!code || !walletStr) {
     return NextResponse.json({ error: "Missing code or wallet" }, { status: 400 });
+  }
+  if (code.length > 64) {
+    return NextResponse.json({ error: "Invalid claim code" }, { status: 400 });
   }
 
   let wallet: PublicKey;
@@ -109,11 +124,10 @@ export async function POST(req: NextRequest) {
   }
 
   const amount = coin.reward_amount ?? DEFAULT_REWARD;
+  const result = await payoutScav(wallet, amount);
 
-  try {
-    const txSignature = await payoutScav(wallet, amount);
-
-    await supabase.from("coins").update({ claim_tx: txSignature }).eq("code", code);
+  if (result.status === "confirmed") {
+    await supabase.from("coins").update({ claim_tx: result.signature }).eq("code", code);
 
     // Fire the notification alongside the transfer; a failure here must never
     // undo the claim or block the response to the finder.
@@ -122,19 +136,38 @@ export async function POST(req: NextRequest) {
       week: coin.week,
       wallet: walletStr,
       amount,
-      txSignature,
+      txSignature: result.signature,
     });
 
     logAttempt(supabase, { code, wallet: walletStr, success: true });
-    return NextResponse.json({ success: true, amount, txSignature });
-  } catch (err) {
-    console.error("Payout failed after claim was recorded:", err);
-    // Roll the row back to unclaimed so the finder (or support) can retry.
+    return NextResponse.json({ success: true, amount, txSignature: result.signature });
+  }
+
+  if (result.status === "uncertain") {
+    // The transfer may or may not have actually landed on-chain — retrying
+    // automatically here risks paying out twice, so we deliberately do NOT
+    // roll the code back to unclaimed. Flag it for manual follow-up instead.
     await supabase
       .from("coins")
-      .update({ status: "unclaimed", claimed_by: null, claimed_at: null })
+      .update({ claim_tx: `PENDING_REVIEW:${result.signature}` })
       .eq("code", code);
-    logAttempt(supabase, { code, wallet: walletStr, success: false, error: "payout_failed" });
-    return NextResponse.json({ error: "Payout failed, please try again" }, { status: 500 });
+    logAttempt(supabase, { code, wallet: walletStr, success: false, error: `payout_uncertain:${result.signature}` });
+    return NextResponse.json(
+      {
+        error:
+          "We couldn't confirm your payout went through, but your claim is recorded — please email support@scavengercoin.com with this code and we'll sort it out.",
+      },
+      { status: 202 }
+    );
   }
+
+  // result.status === "failed" — the transfer definitively never landed, so
+  // it's safe to roll back and let the finder retry.
+  console.error("Payout failed after claim was recorded (code:", code, ")");
+  await supabase
+    .from("coins")
+    .update({ status: "unclaimed", claimed_by: null, claimed_at: null })
+    .eq("code", code);
+  logAttempt(supabase, { code, wallet: walletStr, success: false, error: "payout_failed" });
+  return NextResponse.json({ error: "Payout failed, please try again" }, { status: 500 });
 }
