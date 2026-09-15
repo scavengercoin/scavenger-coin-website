@@ -66,10 +66,10 @@ export default function Home() {
             <CyclingPhrase />
           </p>
           <Link
-            href="/claim"
+            href="#how-it-works"
             className="mt-2 rounded-full bg-[#F5C518] px-8 py-3.5 text-sm font-semibold tracking-wide text-[#0A0A0A] transition hover:brightness-110 active:scale-[0.98] sm:text-base"
           >
-            Found a coin? Claim here
+            Found a coin? Scan it to claim
           </Link>
         </div>
 
@@ -78,7 +78,7 @@ export default function Home() {
 
       {/* HOW IT WORKS */}
       <FadeIn>
-        <section className="mx-auto max-w-5xl px-6 py-20 sm:py-28">
+        <section id="how-it-works" className="mx-auto max-w-5xl scroll-mt-20 px-6 py-20 sm:py-28">
           <h2 className="font-display mb-12 text-center text-4xl text-[#F0EDE8] sm:text-5xl">
             HOW IT WORKS
           </h2>
