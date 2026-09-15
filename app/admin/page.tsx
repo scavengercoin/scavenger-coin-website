@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { parseClaimTx } from "@/lib/claim-status";
 
 type Coin = {
   code: string;
@@ -18,6 +19,10 @@ function fmtDate(iso: string | null) {
   return new Date(iso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
 }
 
+function truncate(s: string, n = 12) {
+  return s.length > n ? `${s.slice(0, n)}…` : s;
+}
+
 export default function AdminPage() {
   const [coins, setCoins] = useState<Coin[] | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -27,23 +32,8 @@ export default function AdminPage() {
   const [createResult, setCreateResult] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
 
-  const [bonusWallet, setBonusWallet] = useState("");
-  const [bonusResult, setBonusResult] = useState<string | null>(null);
-  const [sendingBonus, setSendingBonus] = useState(false);
-
-  const [expiring, setExpiring] = useState<string | null>(null);
-
-  async function loadCoins() {
-    try {
-      const res = await fetch("/api/admin/coins");
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Failed to load");
-      setCoins(data.coins);
-      setLoadError(null);
-    } catch (err) {
-      setLoadError(err instanceof Error ? err.message : "Failed to load coins");
-    }
-  }
+  const [busyCode, setBusyCode] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -60,6 +50,16 @@ export default function AdminPage() {
     load();
   }, []);
 
+  async function reload() {
+    try {
+      const res = await fetch("/api/admin/coins");
+      const data = await res.json();
+      if (res.ok) setCoins(data.coins);
+    } catch {
+      // Keep showing the stale list rather than blanking it on a transient error.
+    }
+  }
+
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     setCreating(true);
@@ -74,7 +74,7 @@ export default function AdminPage() {
       if (!res.ok) throw new Error(data.error ?? "Failed to create code");
       setCreateResult(`Created ${data.coin.code} — ${data.claimUrl}`);
       setNewWeek("");
-      await loadCoins();
+      await reload();
     } catch (err) {
       setCreateResult(`Error: ${err instanceof Error ? err.message : "unknown error"}`);
     } finally {
@@ -84,7 +84,8 @@ export default function AdminPage() {
 
   async function handleExpire(code: string) {
     if (!confirm(`Mark ${code} as expired? This cannot be undone.`)) return;
-    setExpiring(code);
+    setBusyCode(code);
+    setActionError(null);
     try {
       const res = await fetch("/api/admin/expire", {
         method: "POST",
@@ -93,43 +94,84 @@ export default function AdminPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Failed to expire");
-      await loadCoins();
+      await reload();
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to expire code");
+      setActionError(err instanceof Error ? err.message : "Failed to expire code");
     } finally {
-      setExpiring(null);
+      setBusyCode(null);
     }
   }
 
-  async function handleBonus(e: React.FormEvent) {
-    e.preventDefault();
-    setSendingBonus(true);
-    setBonusResult(null);
+  async function handleBonus(code: string) {
+    if (!confirm(`Send 500 SCAV bonus for ${code}? Only do this after verifying their social post.`)) return;
+    setBusyCode(code);
+    setActionError(null);
     try {
       const res = await fetch("/api/admin/bonus", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ wallet: bonusWallet }),
+        body: JSON.stringify({ code }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Bonus payout failed");
-      setBonusResult(`Sent! Tx: ${data.txSignature}`);
-      setBonusWallet("");
+      await reload();
     } catch (err) {
-      setBonusResult(`Error: ${err instanceof Error ? err.message : "unknown error"}`);
+      setActionError(err instanceof Error ? err.message : "Bonus payout failed");
     } finally {
-      setSendingBonus(false);
+      setBusyCode(null);
     }
   }
+
+  async function handleResolve(code: string, type: "claim" | "bonus", outcome: "confirmed" | "failed") {
+    const label = type === "claim" ? "claim payout" : "bonus payout";
+    if (!confirm(`Mark this ${label} as ${outcome}? Double-check the transaction on an explorer first.`)) return;
+    setBusyCode(code);
+    setActionError(null);
+    try {
+      const res = await fetch("/api/admin/resolve", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code, type, outcome }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed to resolve");
+      await reload();
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : "Failed to resolve");
+    } finally {
+      setBusyCode(null);
+    }
+  }
+
+  const needsReview =
+    coins?.filter((c) => {
+      const s = parseClaimTx(c.claim_tx);
+      return s.claimStatus === "pending_review" || s.bonusStatus === "pending_review";
+    }) ?? [];
 
   return (
     <main className="min-h-screen bg-[#0A0A0A] p-6 text-[#F0EDE8] sm:p-10">
       <h1 className="font-display mb-8 text-3xl">SCAV ADMIN</h1>
 
-      <section className="mb-10 grid gap-6 sm:grid-cols-2">
+      {needsReview.length > 0 && (
+        <div className="mb-8 rounded-xl border border-red-400/50 bg-red-400/10 p-4">
+          <p className="text-sm font-semibold text-red-400">
+            ⚠ {needsReview.length} payout{needsReview.length > 1 ? "s" : ""} need manual review — scroll
+            to the highlighted row{needsReview.length > 1 ? "s" : ""} below.
+          </p>
+        </div>
+      )}
+
+      {actionError && (
+        <div className="mb-6 rounded-lg border border-red-400/40 bg-red-400/10 p-3 text-sm text-red-400">
+          {actionError}
+        </div>
+      )}
+
+      <section className="mb-10">
         <form
           onSubmit={handleCreate}
-          className="rounded-xl border border-[#2A2A2A] bg-[#141414] p-5"
+          className="max-w-md rounded-xl border border-[#2A2A2A] bg-[#141414] p-5"
         >
           <h2 className="mb-4 text-sm font-semibold tracking-wide text-[#F5C518]">
             New claim code
@@ -166,38 +208,6 @@ export default function AdminPage() {
             <p className="mt-3 break-all text-xs text-[#F0EDE8]/70">{createResult}</p>
           )}
         </form>
-
-        <form
-          onSubmit={handleBonus}
-          className="rounded-xl border border-[#2A2A2A] bg-[#141414] p-5"
-        >
-          <h2 className="mb-4 text-sm font-semibold tracking-wide text-[#F5C518]">
-            Send bonus payout (500 SCAV)
-          </h2>
-          <p className="mb-3 text-xs text-[#F0EDE8]/50">
-            Only send after you&apos;ve verified their social media post yourself.
-          </p>
-          <label className="mb-4 block text-sm">
-            Wallet address
-            <input
-              required
-              value={bonusWallet}
-              onChange={(e) => setBonusWallet(e.target.value)}
-              placeholder="Solana wallet address"
-              className="mt-1 w-full rounded-md border border-[#2A2A2A] bg-black/40 px-3 py-2 font-mono text-xs"
-            />
-          </label>
-          <button
-            type="submit"
-            disabled={sendingBonus}
-            className="rounded-md bg-[#F5C518] px-4 py-2 text-sm font-semibold text-[#0A0A0A] disabled:opacity-50"
-          >
-            {sendingBonus ? "Sending..." : "Send 500 SCAV bonus"}
-          </button>
-          {bonusResult && (
-            <p className="mt-3 break-all text-xs text-[#F0EDE8]/70">{bonusResult}</p>
-          )}
-        </form>
       </section>
 
       <section>
@@ -208,7 +218,7 @@ export default function AdminPage() {
         {!coins && !loadError && <p className="text-sm text-[#F0EDE8]/50">Loading...</p>}
         {coins && (
           <div className="overflow-x-auto rounded-xl border border-[#2A2A2A]">
-            <table className="w-full min-w-[900px] text-left text-xs">
+            <table className="w-full min-w-[1100px] text-left text-xs">
               <thead className="bg-[#141414] text-[#F0EDE8]/50">
                 <tr>
                   <th className="p-3">Code</th>
@@ -217,43 +227,117 @@ export default function AdminPage() {
                   <th className="p-3">Reward</th>
                   <th className="p-3">Claimed by</th>
                   <th className="p-3">Claimed at</th>
-                  <th className="p-3">Tx</th>
-                  <th className="p-3">Action</th>
+                  <th className="p-3">Bonus</th>
+                  <th className="p-3">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {coins.map((c) => (
-                  <tr key={c.code} className="border-t border-[#2A2A2A]">
-                    <td className="p-3 font-mono">{c.code}</td>
-                    <td className="p-3">{c.week ?? "—"}</td>
-                    <td className="p-3">
-                      <span
-                        className={c.status === "unclaimed" ? "text-[#F5C518]" : "text-[#F0EDE8]/50"}
-                      >
-                        {c.status}
-                      </span>
-                    </td>
-                    <td className="p-3">{c.reward_amount.toLocaleString()}</td>
-                    <td className="p-3 max-w-[160px] truncate font-mono" title={c.claimed_by ?? ""}>
-                      {c.claimed_by ?? "—"}
-                    </td>
-                    <td className="p-3">{fmtDate(c.claimed_at)}</td>
-                    <td className="p-3 max-w-[140px] truncate font-mono" title={c.claim_tx ?? ""}>
-                      {c.claim_tx ?? "—"}
-                    </td>
-                    <td className="p-3">
-                      {c.status === "unclaimed" && (
-                        <button
-                          onClick={() => handleExpire(c.code)}
-                          disabled={expiring === c.code}
-                          className="rounded border border-red-400/40 px-2 py-1 text-red-400 hover:bg-red-400/10 disabled:opacity-50"
-                        >
-                          {expiring === c.code ? "..." : "Mark expired"}
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                {coins.map((c) => {
+                  const state = parseClaimTx(c.claim_tx);
+                  const flagged = state.claimStatus === "pending_review" || state.bonusStatus === "pending_review";
+                  const canBonus =
+                    c.status === "claimed" &&
+                    c.claimed_by !== "EXPIRED - no winner" &&
+                    state.claimStatus === "confirmed" &&
+                    state.bonusStatus === "none";
+
+                  return (
+                    <tr
+                      key={c.code}
+                      className={`border-t border-[#2A2A2A] ${flagged ? "bg-red-400/10" : ""}`}
+                    >
+                      <td className="p-3 font-mono">{c.code}</td>
+                      <td className="p-3">{c.week ?? "—"}</td>
+                      <td className="p-3">
+                        <span className={c.status === "unclaimed" ? "text-[#F5C518]" : "text-[#F0EDE8]/50"}>
+                          {c.status}
+                        </span>
+                        {state.claimStatus === "pending_review" && (
+                          <span className="ml-2 rounded bg-red-400/20 px-1.5 py-0.5 text-red-400">
+                            ⚠ payout unconfirmed
+                          </span>
+                        )}
+                      </td>
+                      <td className="p-3">{c.reward_amount.toLocaleString()}</td>
+                      <td className="p-3 max-w-[160px] truncate font-mono" title={c.claimed_by ?? ""}>
+                        {c.claimed_by ?? "—"}
+                      </td>
+                      <td className="p-3">{fmtDate(c.claimed_at)}</td>
+                      <td className="p-3">
+                        {state.bonusStatus === "none" && <span className="text-[#F0EDE8]/40">not sent</span>}
+                        {state.bonusStatus === "pending" && <span className="text-[#F5C518]">sending…</span>}
+                        {state.bonusStatus === "sent" && (
+                          <span className="text-[#F0EDE8]/50" title={state.bonusSig ?? ""}>
+                            ✓ sent {truncate(state.bonusSig ?? "")}
+                          </span>
+                        )}
+                        {state.bonusStatus === "pending_review" && (
+                          <span className="rounded bg-red-400/20 px-1.5 py-0.5 text-red-400">
+                            ⚠ needs review
+                          </span>
+                        )}
+                      </td>
+                      <td className="p-3">
+                        <div className="flex flex-wrap gap-2">
+                          {c.status === "unclaimed" && (
+                            <button
+                              onClick={() => handleExpire(c.code)}
+                              disabled={busyCode === c.code}
+                              className="rounded border border-red-400/40 px-2 py-1 text-red-400 hover:bg-red-400/10 disabled:opacity-50"
+                            >
+                              Mark expired
+                            </button>
+                          )}
+                          {canBonus && (
+                            <button
+                              onClick={() => handleBonus(c.code)}
+                              disabled={busyCode === c.code}
+                              className="rounded border border-[#F5C518]/40 px-2 py-1 text-[#F5C518] hover:bg-[#F5C518]/10 disabled:opacity-50"
+                            >
+                              Send bonus
+                            </button>
+                          )}
+                          {state.claimStatus === "pending_review" && (
+                            <>
+                              <button
+                                onClick={() => handleResolve(c.code, "claim", "confirmed")}
+                                disabled={busyCode === c.code}
+                                className="rounded border border-green-400/40 px-2 py-1 text-green-400 hover:bg-green-400/10 disabled:opacity-50"
+                              >
+                                Mark confirmed
+                              </button>
+                              <button
+                                onClick={() => handleResolve(c.code, "claim", "failed")}
+                                disabled={busyCode === c.code}
+                                className="rounded border border-red-400/40 px-2 py-1 text-red-400 hover:bg-red-400/10 disabled:opacity-50"
+                              >
+                                Roll back
+                              </button>
+                            </>
+                          )}
+                          {state.bonusStatus === "pending_review" && (
+                            <>
+                              <button
+                                onClick={() => handleResolve(c.code, "bonus", "confirmed")}
+                                disabled={busyCode === c.code}
+                                className="rounded border border-green-400/40 px-2 py-1 text-green-400 hover:bg-green-400/10 disabled:opacity-50"
+                              >
+                                Mark bonus sent
+                              </button>
+                              <button
+                                onClick={() => handleResolve(c.code, "bonus", "failed")}
+                                disabled={busyCode === c.code}
+                                className="rounded border border-red-400/40 px-2 py-1 text-red-400 hover:bg-red-400/10 disabled:opacity-50"
+                              >
+                                Mark bonus failed
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
