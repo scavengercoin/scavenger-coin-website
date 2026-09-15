@@ -3,5 +3,5 @@
 export const currentHunt = {
   status: "ACTIVE" as const, // "ACTIVE" | "PAUSED" | "ENDED"
   weekNumber: 1,
-  clue: "Where the pizza rat first learned to run — look up before you look down.",
+  clue: "Where a small stone castle keeps watch over a pond of turtles — find a seat and look up at it.",
 };

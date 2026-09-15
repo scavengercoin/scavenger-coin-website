@@ -109,7 +109,7 @@ export default function Home() {
                 {currentHunt.status}
               </span>
               <span className="font-mono text-xs tracking-widest text-[#F0EDE8]/40">
-                CASE FILE — WEEK {String(currentHunt.weekNumber).padStart(2, "0")}
+                CLUE {currentHunt.weekNumber} WEEK {currentHunt.weekNumber}
               </span>
             </div>
 
