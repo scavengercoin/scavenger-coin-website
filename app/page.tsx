@@ -24,7 +24,7 @@ const STEPS = [
   {
     n: "03",
     title: "CLAIM YOUR $SCAV",
-    body: "Scan the QR code on the coin, connect your wallet, and your SCAV lands on-chain in seconds.",
+    body: "Scan the QR code on the coin, connect your wallet, and your SCAV arrives in seconds.",
   },
 ] as const;
 
