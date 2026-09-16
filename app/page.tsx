@@ -40,12 +40,12 @@ export default function Home() {
   return (
     <main className="flex-1 bg-[#0A0A0A] text-[#F0EDE8]">
       {/* HERO */}
-      <section className="relative flex min-h-[100svh] flex-col items-center justify-center overflow-hidden px-6 text-center">
+      <section className="relative flex min-h-[100svh] flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-[#0A0400] via-[#3D1400] to-[#0A0A0A] px-6 text-center">
         <DotGrid />
         <Stars />
         <div
           aria-hidden
-          className="gold-glow absolute left-1/2 top-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#F5C518] blur-[100px] sm:h-96 sm:w-96"
+          className="gold-glow absolute left-1/2 top-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#FF6B1A] blur-[100px] sm:h-96 sm:w-96"
         />
         <GoldParticles />
 

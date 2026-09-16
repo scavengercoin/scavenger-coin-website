@@ -11,8 +11,8 @@ const BASELINE = 220;
 // Buildings stay one near-invisible shade — a silhouette suggestion, not a
 // feature in their own right. The gold logo glow is the hero's focal point.
 const BUILDING_FILL = "#111111";
-const WINDOW_GOLD = "#F5C518";
-const WINDOW_BLUE = "#BFE3FF";
+const WINDOW_GOLD = "#FF6B1A";
+const WINDOW_BLUE = "#B34700";
 
 
 

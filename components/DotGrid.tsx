@@ -6,7 +6,7 @@ export function DotGrid() {
       aria-hidden
       className="pointer-events-none absolute inset-0"
       style={{
-        backgroundImage: "radial-gradient(circle, #F5C518 1px, transparent 1px)",
+        backgroundImage: "radial-gradient(circle, #FF6B1A 1px, transparent 1px)",
         backgroundSize: "24px 24px",
         opacity: 0.03,
       }}

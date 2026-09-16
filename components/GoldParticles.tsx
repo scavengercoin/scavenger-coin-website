@@ -20,7 +20,7 @@ export function GoldParticles({ count = 18 }: { count?: number }) {
       {particles.map((p) => (
         <span
           key={p.id}
-          className="particle absolute bottom-0 rounded-full bg-[#F5C518]"
+          className="particle absolute bottom-0 rounded-full bg-[#FF6B1A]"
           style={
             {
               left: `${p.left}%`,
