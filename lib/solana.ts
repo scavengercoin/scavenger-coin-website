@@ -6,7 +6,7 @@ import {
 } from "@solana/spl-token";
 
 export const SCAV_MINT = new PublicKey(
-  process.env.NEXT_PUBLIC_SCAV_MINT_ADDRESS ?? "BGuhyvwuV1z6hGCPHVShrDBwHDypQvnQPvsR1RDHrA3j"
+  process.env.NEXT_PUBLIC_SCAV_MINT_ADDRESS ?? "BfuWHs9zwKvQz85b9RCi8mWuPtmo2ZCpQUtYR49F3zJP"
 );
 
 export const SCAV_DECIMALS = 9;

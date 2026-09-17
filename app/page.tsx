@@ -28,7 +28,7 @@ const STEPS = [
   },
 ] as const;
 
-const MINT_ADDRESS = "BGuhyvwuV1z6hGCPHVShrDBwHDypQvnQPvsR1RDHrA3j";
+const MINT_ADDRESS = process.env.NEXT_PUBLIC_SCAV_MINT_ADDRESS ?? "BfuWHs9zwKvQz85b9RCi8mWuPtmo2ZCpQUtYR49F3zJP";
 
 const SOCIALS = [
   { label: "X", href: "https://x.com/ScavengerCoin" },
