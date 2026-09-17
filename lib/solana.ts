@@ -12,7 +12,7 @@ export const SCAV_MINT = new PublicKey(
 export const SCAV_DECIMALS = 9;
 
 export function getConnection() {
-  return new Connection(process.env.SOLANA_RPC_URL ?? "https://api.devnet.solana.com", "confirmed");
+  return new Connection(process.env.SOLANA_RPC_URL ?? "https://api.mainnet-beta.solana.com", "confirmed");
 }
 
 export function getHuntPoolKeypair(): Keypair {

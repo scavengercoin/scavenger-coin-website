@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  const code = body.code?.trim();
+  const code = body.code?.trim().toLowerCase();
   if (!code) {
     return NextResponse.json({ error: "Missing code" }, { status: 400 });
   }

@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Too many requests, please slow down" }, { status: 429 });
   }
 
-  const code = req.nextUrl.searchParams.get("code")?.trim();
+  const code = req.nextUrl.searchParams.get("code")?.trim().toLowerCase();
   if (!code) {
     return NextResponse.json({ error: "Missing code" }, { status: 400 });
   }
@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  const code = body.code?.trim();
+  const code = body.code?.trim().toLowerCase();
   const walletStr = body.wallet?.trim();
   const supabase = getSupabaseAdmin();
 

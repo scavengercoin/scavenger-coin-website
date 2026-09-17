@@ -16,7 +16,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  const { code, type, outcome } = body;
+  const code = body.code?.trim().toLowerCase();
+  const { type, outcome } = body;
   if (!code || !type || !outcome) {
     return NextResponse.json({ error: "Missing code, type, or outcome" }, { status: 400 });
   }
