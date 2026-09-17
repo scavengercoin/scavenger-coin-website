@@ -91,7 +91,7 @@ function ClaimFlow({ code }: { code: string }) {
           {result.amount.toLocaleString()} SCAV CLAIMED
         </p>
         <a
-          href={`https://explorer.solana.com/tx/${result.txSignature}?cluster=devnet`}
+          href={`https://explorer.solana.com/tx/${result.txSignature}`}
           target="_blank"
           rel="noreferrer"
           className="mt-2 inline-flex items-center gap-2 rounded-full border border-[#F5C518]/40 bg-[#F5C518]/10 px-4 py-2 font-mono text-xs text-[#F5C518]"

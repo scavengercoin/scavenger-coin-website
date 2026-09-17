@@ -34,7 +34,7 @@ export async function sendClaimNotification(details: {
         `Finder wallet: ${details.wallet}`,
         `Amount: ${details.amount.toLocaleString()} SCAV`,
         `Tx signature: ${details.txSignature}`,
-        `Explorer: https://explorer.solana.com/tx/${details.txSignature}?cluster=devnet`,
+        `Explorer: https://explorer.solana.com/tx/${details.txSignature}`,
       ].join("\n"),
     });
     if (error) {
