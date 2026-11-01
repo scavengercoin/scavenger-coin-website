@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { parseClaimTx } from "@/lib/claim-status";
+import { CATEGORY_META, GEM_CATEGORIES } from "@/lib/gems";
 
 type Coin = {
   code: string;
@@ -31,6 +32,19 @@ export default function AdminPage() {
   const [newReward, setNewReward] = useState(500);
   const [createResult, setCreateResult] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
+
+  const emptyGem = {
+    name: "",
+    category: "cafe",
+    neighborhood: "",
+    address: "",
+    description: "",
+    photoUrl: "",
+    huntWeek: "",
+  };
+  const [gem, setGem] = useState(emptyGem);
+  const [gemResult, setGemResult] = useState<string | null>(null);
+  const [addingGem, setAddingGem] = useState(false);
 
   const [busyCode, setBusyCode] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -79,6 +93,27 @@ export default function AdminPage() {
       setCreateResult(`Error: ${err instanceof Error ? err.message : "unknown error"}`);
     } finally {
       setCreating(false);
+    }
+  }
+
+  async function handleAddGem(e: React.FormEvent) {
+    e.preventDefault();
+    setAddingGem(true);
+    setGemResult(null);
+    try {
+      const res = await fetch("/api/admin/gems", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(gem),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed to add gem");
+      setGemResult(`Added "${data.gem.name}" — live at /gems`);
+      setGem(emptyGem);
+    } catch (err) {
+      setGemResult(`Error: ${err instanceof Error ? err.message : "unknown error"}`);
+    } finally {
+      setAddingGem(false);
     }
   }
 
@@ -207,6 +242,96 @@ export default function AdminPage() {
           {createResult && (
             <p className="mt-3 break-all text-xs text-[#F0EDE8]/70">{createResult}</p>
           )}
+        </form>
+      </section>
+
+      <section className="mb-10">
+        <form
+          onSubmit={handleAddGem}
+          className="max-w-md rounded-xl border border-[#2A2A2A] bg-[#141414] p-5"
+        >
+          <h2 className="mb-4 text-sm font-semibold tracking-wide text-[#F5C518]">Add hidden gem</h2>
+          <label className="mb-3 block text-sm">
+            Name
+            <input
+              required
+              maxLength={120}
+              value={gem.name}
+              onChange={(e) => setGem({ ...gem, name: e.target.value })}
+              className="mt-1 w-full rounded-md border border-[#2A2A2A] bg-black/40 px-3 py-2 text-sm"
+            />
+          </label>
+          <label className="mb-3 block text-sm">
+            Category
+            <select
+              value={gem.category}
+              onChange={(e) => setGem({ ...gem, category: e.target.value })}
+              className="mt-1 w-full rounded-md border border-[#2A2A2A] bg-black/40 px-3 py-2 text-sm"
+            >
+              {GEM_CATEGORIES.map((c) => (
+                <option key={c} value={c}>
+                  {CATEGORY_META[c].label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="mb-3 block text-sm">
+            Neighborhood
+            <input
+              maxLength={120}
+              value={gem.neighborhood}
+              onChange={(e) => setGem({ ...gem, neighborhood: e.target.value })}
+              placeholder="West Village"
+              className="mt-1 w-full rounded-md border border-[#2A2A2A] bg-black/40 px-3 py-2 text-sm"
+            />
+          </label>
+          <label className="mb-3 block text-sm">
+            Address
+            <input
+              maxLength={240}
+              value={gem.address}
+              onChange={(e) => setGem({ ...gem, address: e.target.value })}
+              className="mt-1 w-full rounded-md border border-[#2A2A2A] bg-black/40 px-3 py-2 text-sm"
+            />
+          </label>
+          <label className="mb-3 block text-sm">
+            Why it&apos;s a hidden gem
+            <textarea
+              rows={4}
+              maxLength={1000}
+              value={gem.description}
+              onChange={(e) => setGem({ ...gem, description: e.target.value })}
+              className="mt-1 w-full rounded-md border border-[#2A2A2A] bg-black/40 px-3 py-2 text-sm"
+            />
+          </label>
+          <label className="mb-3 block text-sm">
+            Photo URL
+            <input
+              type="url"
+              value={gem.photoUrl}
+              onChange={(e) => setGem({ ...gem, photoUrl: e.target.value })}
+              placeholder="https://..."
+              className="mt-1 w-full rounded-md border border-[#2A2A2A] bg-black/40 px-3 py-2 text-sm"
+            />
+          </label>
+          <label className="mb-4 block text-sm">
+            Hunt week (optional)
+            <input
+              maxLength={60}
+              value={gem.huntWeek}
+              onChange={(e) => setGem({ ...gem, huntWeek: e.target.value })}
+              placeholder="hunt-002"
+              className="mt-1 w-full rounded-md border border-[#2A2A2A] bg-black/40 px-3 py-2 text-sm"
+            />
+          </label>
+          <button
+            type="submit"
+            disabled={addingGem}
+            className="rounded-md bg-[#F5C518] px-4 py-2 text-sm font-semibold text-[#0A0A0A] disabled:opacity-50"
+          >
+            {addingGem ? "Adding..." : "Add gem"}
+          </button>
+          {gemResult && <p className="mt-3 break-all text-xs text-[#F0EDE8]/70">{gemResult}</p>}
         </form>
       </section>
 

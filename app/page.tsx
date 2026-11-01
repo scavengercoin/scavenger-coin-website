@@ -157,6 +157,12 @@ export default function Home() {
               </a>
             ))}
           </div>
+          <Link
+            href="/gems"
+            className="text-xs font-medium tracking-widest text-[#F0EDE8]/50 transition hover:text-[#F5C518]"
+          >
+            HIDDEN GEMS
+          </Link>
           <p className="break-all font-mono text-[11px] text-[#F0EDE8]/30">{MINT_ADDRESS}</p>
           <a
             href="mailto:support@scavengercoin.com"
