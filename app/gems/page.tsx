@@ -61,7 +61,7 @@ export default async function GemsPage() {
       <section className="mx-auto max-w-6xl px-6 py-10 sm:py-14">
         {gems === null ? (
           <p className="py-16 text-center text-sm text-[#F0EDE8]/50">
-            We couldn't load the list. Try again in a minute.
+            We couldn&apos;t load the list. Try again in a minute.
           </p>
         ) : (
           <GemsBrowser gems={gems} />

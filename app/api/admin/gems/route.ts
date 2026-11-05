@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase";
-import { isGemCategory } from "@/lib/gems";
+import { cleanRatings, isGemCategory } from "@/lib/gems";
 
 // Proxy.ts already gates every /api/admin/* route behind ADMIN_PASSWORD
 // (Basic Auth) before requests reach here.
@@ -13,6 +13,8 @@ type GemBody = {
   description?: string;
   photoUrl?: string;
   huntWeek?: string;
+  ratings?: Record<string, number>;
+  price?: number | null;
 };
 
 // Trim, cap length, and store blank fields as null rather than "".
@@ -52,6 +54,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Photo URL must start with http:// or https://" }, { status: 400 });
   }
 
+  const price = body.price ?? null;
+  if (price !== null && !(Number.isInteger(price) && price >= 1 && price <= 5)) {
+    return NextResponse.json({ error: "Price must be 1 to 5" }, { status: 400 });
+  }
+
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("hidden_gems")
@@ -63,6 +70,8 @@ export async function POST(req: NextRequest) {
       description: clean(body.description, 1000),
       photo_url: photoUrl,
       hunt_week: clean(body.huntWeek, 60),
+      ratings: cleanRatings(body.ratings),
+      price,
     })
     .select()
     .single();

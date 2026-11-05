@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { parseClaimTx } from "@/lib/claim-status";
-import { CATEGORY_META, GEM_CATEGORIES } from "@/lib/gems";
+import { CATEGORY_META, CATEGORY_RATINGS, GEM_CATEGORIES, RATING_LABELS, type GemCategory } from "@/lib/gems";
 
 type Coin = {
   code: string;
@@ -41,8 +41,10 @@ export default function AdminPage() {
     description: "",
     photoUrl: "",
     huntWeek: "",
+    price: "",
   };
   const [gem, setGem] = useState(emptyGem);
+  const [ratings, setRatings] = useState<Record<string, string>>({});
   const [gemResult, setGemResult] = useState<string | null>(null);
   const [addingGem, setAddingGem] = useState(false);
 
@@ -104,12 +106,22 @@ export default function AdminPage() {
       const res = await fetch("/api/admin/gems", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(gem),
+        body: JSON.stringify({
+          ...gem,
+          price: gem.price ? Number(gem.price) : null,
+          // Only send the rating fields shown for this category.
+          ratings: Object.fromEntries(
+            CATEGORY_RATINGS[gem.category as GemCategory]
+              .filter((k) => ratings[k])
+              .map((k) => [k, Number(ratings[k])])
+          ),
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Failed to add gem");
       setGemResult(`Added "${data.gem.name}" — live at /gems`);
       setGem(emptyGem);
+      setRatings({});
     } catch (err) {
       setGemResult(`Error: ${err instanceof Error ? err.message : "unknown error"}`);
     } finally {
@@ -275,6 +287,41 @@ export default function AdminPage() {
               ))}
             </select>
           </label>
+          <fieldset className="mb-3 grid grid-cols-2 gap-3 text-sm">
+            <legend className="mb-1">Ratings (stars out of 5, optional)</legend>
+            {CATEGORY_RATINGS[gem.category as GemCategory].map((key) => (
+              <label key={key} className="block text-xs text-[#F0EDE8]/60">
+                {RATING_LABELS[key]}
+                <select
+                  value={ratings[key] ?? ""}
+                  onChange={(e) => setRatings({ ...ratings, [key]: e.target.value })}
+                  className="mt-1 w-full rounded-md border border-[#2A2A2A] bg-black/40 px-3 py-2 text-sm text-[#F0EDE8]"
+                >
+                  <option value="">—</option>
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <option key={n} value={n}>
+                      {n} / 5
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ))}
+            <label className="block text-xs text-[#F0EDE8]/60">
+              Price
+              <select
+                value={gem.price}
+                onChange={(e) => setGem({ ...gem, price: e.target.value })}
+                className="mt-1 w-full rounded-md border border-[#2A2A2A] bg-black/40 px-3 py-2 text-sm text-[#F0EDE8]"
+              >
+                <option value="">—</option>
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <option key={n} value={n}>
+                    {"$".repeat(n)} ({n} / 5)
+                  </option>
+                ))}
+              </select>
+            </label>
+          </fieldset>
           <label className="mb-3 block text-sm">
             Neighborhood
             <input

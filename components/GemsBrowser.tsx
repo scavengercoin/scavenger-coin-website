@@ -2,7 +2,15 @@
 
 import { useMemo, useState } from "react";
 import Image from "next/image";
-import { CATEGORY_META, GEM_CATEGORIES, huntLabel, type Gem, type GemCategory } from "@/lib/gems";
+import {
+  CATEGORY_META,
+  GEM_CATEGORIES,
+  RATING_KEYS,
+  RATING_LABELS,
+  huntLabel,
+  type Gem,
+  type GemCategory,
+} from "@/lib/gems";
 
 type Filter = "all" | GemCategory;
 
@@ -10,6 +18,49 @@ const FILTERS: { value: Filter; label: string }[] = [
   { value: "all", label: "All" },
   ...GEM_CATEGORIES.map((c) => ({ value: c, label: CATEGORY_META[c].label })),
 ];
+
+function Stars({ value }: { value: number }) {
+  return (
+    <span aria-hidden className="tracking-[0.15em]">
+      <span className="text-[#F5C518]">{"★".repeat(value)}</span>
+      <span className="text-[#F0EDE8]/20">{"★".repeat(5 - value)}</span>
+    </span>
+  );
+}
+
+function Dollars({ value }: { value: number }) {
+  return (
+    <span aria-hidden className="font-semibold tracking-wider">
+      <span className="text-[#F5C518]">{"$".repeat(value)}</span>
+      <span className="text-[#F0EDE8]/20">{"$".repeat(5 - value)}</span>
+    </span>
+  );
+}
+
+function Ratings({ gem }: { gem: Gem }) {
+  const rows = RATING_KEYS.filter((k) => gem.ratings?.[k]);
+  if (rows.length === 0 && !gem.price) return null;
+  return (
+    <dl className="mt-1 grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-1 text-xs">
+      {rows.map((key) => (
+        <div key={key} className="contents">
+          <dt className="text-[#F0EDE8]/50">{RATING_LABELS[key]}</dt>
+          <dd className="text-sm" aria-label={`${RATING_LABELS[key]}: ${gem.ratings![key]} out of 5`}>
+            <Stars value={gem.ratings![key]!} />
+          </dd>
+        </div>
+      ))}
+      {gem.price ? (
+        <div className="contents">
+          <dt className="text-[#F0EDE8]/50">Price</dt>
+          <dd className="text-sm" aria-label={`Price: ${gem.price} out of 5`}>
+            <Dollars value={gem.price} />
+          </dd>
+        </div>
+      ) : null}
+    </dl>
+  );
+}
 
 function GemCard({ gem }: { gem: Gem }) {
   const meta = CATEGORY_META[gem.category];
@@ -67,6 +118,7 @@ function GemCard({ gem }: { gem: Gem }) {
         {gem.description && (
           <p className="line-clamp-4 text-sm leading-relaxed text-[#F0EDE8]/60">{gem.description}</p>
         )}
+        <Ratings gem={gem} />
         {gem.hunt_week && (
           <p className="mt-auto pt-2">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-[#2A2A2A] bg-black/40 px-2.5 py-1 text-[11px] font-medium tracking-wide text-[#F0EDE8]/70">
