@@ -143,8 +143,8 @@ export function GemsBrowser({ gems }: { gems: Gem[] }) {
           />
           <p className="text-sm text-[#F0EDE8]/50">
             {gems.length === 0
-              ? "No gems yet. The pigeon is still scouting."
-              : "Nothing matches that. The pigeon shrugs."}
+              ? "No gems yet. We're still scouting."
+              : "Nothing matches that. Try a different search."}
           </p>
         </div>
       )}
