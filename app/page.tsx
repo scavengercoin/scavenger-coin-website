@@ -49,6 +49,14 @@ export default function Home() {
         />
         <GoldParticles />
 
+        <Link
+          href="/gems"
+          className="absolute right-4 top-4 z-20 inline-flex items-center gap-2 rounded-full border border-[#F5C518]/40 bg-[#0A0A0A]/70 px-4 py-2 text-xs font-semibold tracking-widest text-[#F5C518] backdrop-blur transition hover:border-[#F5C518] hover:bg-[#F5C518] hover:text-[#0A0A0A] sm:right-6 sm:top-6"
+        >
+          <span aria-hidden>🗽</span>
+          HIDDEN GEMS
+        </Link>
+
         <div className="relative z-10 flex flex-col items-center gap-6">
           <Image
             src="/scav-logo.jpg"
