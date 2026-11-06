@@ -27,11 +27,13 @@ export const RATING_LABELS: Record<RatingKey, string> = {
   overall: "Overall",
 };
 
+// Which ratings apply per category, in the order cards and the admin form show
+// them (substance first, ambiance last, then price on the card).
 export const CATEGORY_RATINGS: Record<GemCategory, RatingKey[]> = {
-  cafe: ["ambiance", "coffee", "pastries", "overall"],
-  lunch: ["ambiance", "food", "drinks", "overall"],
-  dinner: ["ambiance", "food", "drinks", "overall"],
-  bar: ["ambiance", "drinks", "overall"],
+  cafe: ["coffee", "pastries", "ambiance", "overall"],
+  lunch: ["food", "drinks", "ambiance", "overall"],
+  dinner: ["food", "drinks", "ambiance", "overall"],
+  bar: ["drinks", "ambiance", "overall"],
   sunset: ["beauty", "novelty", "overall"],
   landmark: ["beauty", "novelty", "overall"],
 };
@@ -46,7 +48,7 @@ export type Gem = {
   photo_url: string | null;
   hunt_week: string | null;
   ratings: Ratings | null;
-  price: number | null; // 1-5, shown as $ out of $$$$$
+  price: number | null; // tier 1-4, shown as $ to $$$$
   lat: number | null;
   lng: number | null;
   created_at: string;

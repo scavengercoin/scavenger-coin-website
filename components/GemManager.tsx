@@ -237,9 +237,9 @@ export function GemManager() {
               className={selectClass}
             >
               <option value="">—</option>
-              {[1, 2, 3, 4, 5].map((n) => (
+              {[1, 2, 3, 4].map((n) => (
                 <option key={n} value={n}>
-                  {"$".repeat(n)} ({n} / 5)
+                  {"$".repeat(n)}
                 </option>
               ))}
             </select>

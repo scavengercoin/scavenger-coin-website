@@ -4,8 +4,8 @@ import { useMemo, useState } from "react";
 import Image from "next/image";
 import {
   CATEGORY_META,
+  CATEGORY_RATINGS,
   GEM_CATEGORIES,
-  RATING_KEYS,
   RATING_LABELS,
   spotlightLabel,
   type Gem,
@@ -28,20 +28,24 @@ function Stars({ value }: { value: number }) {
   );
 }
 
+const PRICE_TIERS = 4;
+
 function Dollars({ value }: { value: number }) {
   return (
     <span aria-hidden className="font-semibold tracking-wider">
       <span className="text-accent">{"$".repeat(value)}</span>
-      <span className="text-ink/40">{"$".repeat(5 - value)}</span>
+      <span className="text-ink/40">{"$".repeat(PRICE_TIERS - value)}</span>
     </span>
   );
 }
 
 function Ratings({ gem }: { gem: Gem }) {
-  const rows = RATING_KEYS.filter((k) => gem.ratings?.[k]);
-  if (rows.length === 0 && !gem.price) return null;
+  // Fixed order per category (see CATEGORY_RATINGS), not whatever order the data has.
+  const rows = CATEGORY_RATINGS[gem.category].filter((k) => gem.ratings?.[k]);
+  const price = gem.price ? Math.min(gem.price, PRICE_TIERS) : null;
+  if (rows.length === 0 && !price) return null;
   return (
-    <dl className="mt-1 grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-1 text-xs">
+    <dl className="grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-1 text-xs">
       {rows.map((key) => (
         <div key={key} className="contents">
           <dt className="text-ink/60">{RATING_LABELS[key]}</dt>
@@ -50,11 +54,11 @@ function Ratings({ gem }: { gem: Gem }) {
           </dd>
         </div>
       ))}
-      {gem.price ? (
+      {price ? (
         <div className="contents">
           <dt className="text-ink/60">Price</dt>
-          <dd className="text-sm" aria-label={`Price: ${gem.price} out of 5`}>
-            <Dollars value={gem.price} />
+          <dd className="text-sm" aria-label={`Price: ${price} out of ${PRICE_TIERS}`}>
+            <Dollars value={price} />
           </dd>
         </div>
       ) : null}
@@ -65,8 +69,11 @@ function Ratings({ gem }: { gem: Gem }) {
 function GemCard({ gem }: { gem: Gem }) {
   const meta = CATEGORY_META[gem.category];
   return (
-    <article className="flex flex-col overflow-hidden rounded-xl border border-line bg-surface transition hover:border-accent/40">
-      <div className="relative aspect-[4/3] bg-gradient-to-br from-surface to-bg">
+    // The grid gives every card three row tracks (photo, title, body) that are shared
+    // with the other cards in the same row via subgrid, so titles and ratings start
+    // at the same height and any leftover space falls at the bottom of the card.
+    <article className="row-span-3 grid grid-rows-subgrid gap-y-0 overflow-hidden rounded-xl border border-line bg-surface transition hover:border-accent/40">
+      <div className="relative aspect-[4/5] bg-gradient-to-br from-surface to-bg">
         {gem.photo_url ? (
           // Plain <img>: photo URLs can point at any host, so next/image's
           // remotePatterns allowlist doesn't fit here.
@@ -76,10 +83,10 @@ function GemCard({ gem }: { gem: Gem }) {
             alt={gem.name}
             loading="lazy"
             referrerPolicy="no-referrer"
-            className="h-full w-full object-cover"
+            className="absolute inset-0 h-full w-full object-cover object-center"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center">
+          <div className="absolute inset-0 flex items-center justify-center">
             <Image
               src="/scav-logo.jpg"
               alt=""
@@ -95,8 +102,10 @@ function GemCard({ gem }: { gem: Gem }) {
         </span>
       </div>
 
-      <div className="flex flex-1 flex-col gap-2 p-5">
-        <h3 className="font-display text-2xl leading-tight">{gem.name}</h3>
+      <h3 className="font-display px-5 pt-5 text-2xl leading-tight">{gem.name}</h3>
+
+      <div className="flex flex-col gap-2 px-5 pb-5 pt-3">
+        <Ratings gem={gem} />
         {(gem.neighborhood || gem.address) && (
           <p className="text-xs text-ink/60">
             {gem.neighborhood && <span className="font-medium text-ink/70">{gem.neighborhood}</span>}
@@ -118,9 +127,8 @@ function GemCard({ gem }: { gem: Gem }) {
         {gem.description && (
           <p className="line-clamp-4 text-sm leading-relaxed text-ink/60">{gem.description}</p>
         )}
-        <Ratings gem={gem} />
         {gem.hunt_week && (
-          <p className="mt-auto pt-2">
+          <p className="pt-1">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-bg/60 px-2.5 py-1 text-[11px] font-medium tracking-wide text-ink/70">
               <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-accent" />
               {spotlightLabel(gem.hunt_week)}

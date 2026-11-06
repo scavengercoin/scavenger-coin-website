@@ -42,8 +42,8 @@ export function parseGemInput(body: unknown): { ok: true; fields: GemFields } | 
   }
 
   const price = b.price ?? null;
-  if (price !== null && !(typeof price === "number" && Number.isInteger(price) && price >= 1 && price <= 5)) {
-    return { ok: false, error: "Price must be 1 to 5" };
+  if (price !== null && !(typeof price === "number" && Number.isInteger(price) && price >= 1 && price <= 4)) {
+    return { ok: false, error: "Price must be 1 to 4" };
   }
 
   // Drop any rating that doesn't belong to this category (e.g. after switching it).
