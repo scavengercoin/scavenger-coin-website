@@ -12,7 +12,7 @@ function Half({ hidden }: { hidden?: boolean }) {
           key={i}
           // Only the first copy is read aloud; the rest are visual filler.
           aria-hidden={hidden || i > 0 || undefined}
-          className="px-10 text-xs font-medium tracking-widest text-[#FF6B1A]"
+          className="px-10 text-xs font-medium tracking-widest text-accent"
         >
           {TICKER_TEXT}
         </span>
@@ -23,7 +23,7 @@ function Half({ hidden }: { hidden?: boolean }) {
 
 export function TickerBar() {
   return (
-    <div className="overflow-hidden border-b border-[#2A2A2A] bg-[#0A0A0A] py-2">
+    <div className="overflow-hidden border-b border-line bg-bg py-2">
       <div className="ticker-track flex w-max whitespace-nowrap">
         <Half />
         <Half hidden />

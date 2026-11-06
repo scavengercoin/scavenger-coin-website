@@ -19,15 +19,15 @@ export function InfoPanel() {
       {FAQS.map((item) => (
         <details
           key={item.q}
-          className="group rounded-lg border border-[#2A2A2A] bg-[#141414] px-4 py-3 open:pb-4"
+          className="group rounded-lg border border-line bg-surface px-4 py-3 open:pb-4"
         >
-          <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-medium text-[#F0EDE8]">
+          <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-medium text-ink">
             {item.q}
-            <span className="ml-2 text-[#F5C518] transition-transform group-open:rotate-45">
+            <span className="ml-2 text-accent transition-transform group-open:rotate-45">
               +
             </span>
           </summary>
-          <p className="mt-2 text-sm leading-relaxed text-[#F0EDE8]/60">{item.a}</p>
+          <p className="mt-2 text-sm leading-relaxed text-ink/60">{item.a}</p>
         </details>
       ))}
     </div>

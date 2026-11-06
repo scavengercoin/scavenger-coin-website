@@ -22,7 +22,8 @@ type ClaimResult =
   | { status: "error"; message: string };
 
 function fireGoldConfetti() {
-  const colors = ["#F5C518", "#F5E4A8", "#D4A017"];
+  // Same gold family as the theme accent (canvas needs real hex, not CSS vars).
+  const colors = ["#E2B24A", "#F3E0AE", "#CDA03E"];
   confetti({ particleCount: 120, spread: 90, origin: { y: 0.6 }, colors });
   setTimeout(
     () => confetti({ particleCount: 60, spread: 120, origin: { y: 0.4 }, colors }),
@@ -86,15 +87,15 @@ function ClaimFlow({ code }: { code: string }) {
   if (result.status === "success") {
     return (
       <div className="flex flex-col items-center gap-6 text-center">
-        <p className="font-display text-3xl text-[#F5C518] sm:text-4xl">CLAIM CONFIRMED</p>
-        <p className="font-display text-5xl leading-none text-[#F0EDE8] sm:text-7xl">
+        <p className="font-display text-3xl text-accent sm:text-4xl">CLAIM CONFIRMED</p>
+        <p className="font-display text-5xl leading-none text-ink sm:text-7xl">
           {result.amount.toLocaleString()} SCAV CLAIMED
         </p>
         <a
           href={`https://explorer.solana.com/tx/${result.txSignature}`}
           target="_blank"
           rel="noreferrer"
-          className="mt-2 inline-flex items-center gap-2 rounded-full border border-[#F5C518]/40 bg-[#F5C518]/10 px-4 py-2 font-mono text-xs text-[#F5C518]"
+          className="mt-2 inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-4 py-2 font-mono text-xs text-accent"
         >
           View transaction ↗
         </a>
@@ -106,8 +107,8 @@ function ClaimFlow({ code }: { code: string }) {
   if (lookup.state === "no-code") {
     return (
       <div className="text-center">
-        <p className="font-display text-3xl text-[#F0EDE8] sm:text-4xl">NO COIN SCANNED</p>
-        <p className="mx-auto mt-3 max-w-xs text-sm text-[#F0EDE8]/50">
+        <p className="font-display text-3xl text-ink sm:text-4xl">NO COIN SCANNED</p>
+        <p className="mx-auto mt-3 max-w-xs text-sm text-ink/60">
           Scan the QR code on the coin you found to load your claim link.
         </p>
       </div>
@@ -117,7 +118,7 @@ function ClaimFlow({ code }: { code: string }) {
   // --- Still checking the code ---
   if (lookup.state === "checking") {
     return (
-      <div className="pulse-ring h-16 w-16 rounded-full border-2 border-[#F5C518]/60" />
+      <div className="pulse-ring h-16 w-16 rounded-full border-2 border-accent/60" />
     );
   }
 
@@ -125,8 +126,8 @@ function ClaimFlow({ code }: { code: string }) {
   if (lookup.state === "unknown") {
     return (
       <div className="text-center">
-        <p className="font-display text-3xl text-[#F0EDE8] sm:text-4xl">COIN NOT RECOGNIZED</p>
-        <p className="mx-auto mt-3 max-w-xs text-sm text-[#F0EDE8]/50">
+        <p className="font-display text-3xl text-ink sm:text-4xl">COIN NOT RECOGNIZED</p>
+        <p className="mx-auto mt-3 max-w-xs text-sm text-ink/60">
           This code doesn&apos;t match a coin in this week&apos;s hunt. Double-check the
           QR code, or reach out if you think this is a mistake.
         </p>
@@ -144,10 +145,10 @@ function ClaimFlow({ code }: { code: string }) {
       : null;
     return (
       <div className="text-center">
-        <p className="font-display text-3xl text-[#F0EDE8] sm:text-4xl">
+        <p className="font-display text-3xl text-ink sm:text-4xl">
           THIS COIN HAS BEEN CLAIMED
         </p>
-        {date && <p className="mt-3 text-sm text-[#F0EDE8]/50">Claimed on {date}</p>}
+        {date && <p className="mt-3 text-sm text-ink/60">Claimed on {date}</p>}
       </div>
     );
   }
@@ -156,24 +157,24 @@ function ClaimFlow({ code }: { code: string }) {
   return (
     <div className="flex w-full flex-col items-center gap-8 text-center">
       <div className="relative flex h-24 w-24 items-center justify-center">
-        <div className="pulse-ring absolute inset-0 rounded-full border-2 border-[#F5C518]/60" />
+        <div className="pulse-ring absolute inset-0 rounded-full border-2 border-accent/60" />
         <div className="relative h-[80%] w-[80%] overflow-hidden rounded-full">
-          <Image src="/scav-logo.jpg" alt="Scavenger Coin logo" fill className="object-cover" />
+          <Image src="/scav-logo.jpg" alt="The Scavenger NYC logo" fill className="object-cover" />
         </div>
       </div>
 
       <div>
-        <p className="font-display text-4xl text-[#F0EDE8] sm:text-6xl">COIN FOUND</p>
-        <p className="mt-3 font-mono text-sm tracking-[0.3em] text-[#F5C518] sm:text-base">
+        <p className="font-display text-4xl text-ink sm:text-6xl">COIN FOUND</p>
+        <p className="mt-3 font-mono text-sm tracking-[0.3em] text-accent sm:text-base">
           SN·{code.toUpperCase()}
         </p>
-        <p className="mt-1 text-xs text-[#F0EDE8]/40">
+        <p className="mt-1 text-xs text-ink/60">
           Worth {lookup.amount.toLocaleString()} $SCAV
         </p>
       </div>
 
       {!connected && (
-        <div className="[&_.wallet-adapter-button]:bg-[#F5C518]! [&_.wallet-adapter-button]:text-[#0A0A0A]! [&_.wallet-adapter-button]:text-base! [&_.wallet-adapter-button]:px-8! [&_.wallet-adapter-button]:py-4! [&_.wallet-adapter-button]:font-semibold!">
+        <div className="[&_.wallet-adapter-button]:bg-accent! [&_.wallet-adapter-button]:text-bg! [&_.wallet-adapter-button]:text-base! [&_.wallet-adapter-button]:px-8! [&_.wallet-adapter-button]:py-4! [&_.wallet-adapter-button]:font-semibold!">
           <WalletMultiButton />
         </div>
       )}
@@ -182,7 +183,7 @@ function ClaimFlow({ code }: { code: string }) {
         <button
           onClick={handleClaim}
           disabled={result.status === "loading"}
-          className="rounded-full bg-[#F5C518] px-10 py-4 text-base font-semibold text-[#0A0A0A] transition hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
+          className="rounded-full bg-accent px-10 py-4 text-base font-semibold text-bg transition hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
         >
           {result.status === "loading" ? "Claiming..." : "Claim $SCAV"}
         </button>
@@ -207,7 +208,7 @@ function ClaimFlowRoute() {
 
 export default function ClaimPage() {
   return (
-    <main className="flex min-h-[100svh] flex-1 flex-col items-center justify-center bg-[#0A0A0A] px-6 py-16 text-[#F0EDE8]">
+    <main className="flex min-h-[calc(100svh-5.75rem)] flex-1 flex-col items-center justify-center bg-bg px-6 py-16 text-ink">
       <Suspense fallback={null}>
         <ClaimFlowRoute />
       </Suspense>

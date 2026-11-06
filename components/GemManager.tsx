@@ -67,8 +67,8 @@ async function shrinkImage(file: File): Promise<Blob> {
   );
 }
 
-const inputClass = "mt-1 w-full rounded-md border border-[#2A2A2A] bg-black/40 px-3 py-2 text-sm";
-const selectClass = `${inputClass} text-[#F0EDE8]`;
+const inputClass = "mt-1 w-full rounded-md border border-ink/40 bg-bg/60 px-3 py-2 text-sm";
+const selectClass = `${inputClass} text-ink`;
 
 export function GemManager() {
   const [gems, setGems] = useState<Gem[] | null>(null);
@@ -178,9 +178,9 @@ export function GemManager() {
       <form
         ref={formTop}
         onSubmit={handleSubmit}
-        className="mb-8 max-w-md scroll-mt-6 rounded-xl border border-[#2A2A2A] bg-[#141414] p-5"
+        className="mb-8 max-w-md scroll-mt-6 rounded-xl border border-line bg-surface p-5"
       >
-        <h3 className="mb-4 text-sm font-semibold tracking-wide text-[#F5C518]">
+        <h3 className="mb-4 text-sm font-semibold tracking-wide text-accent">
           {editingId ? `Editing: ${form.name || "gem"}` : "Add hidden gem"}
         </h3>
 
@@ -213,7 +213,7 @@ export function GemManager() {
         <fieldset className="mb-3 grid grid-cols-2 gap-3 text-sm">
           <legend className="mb-1">Ratings (stars out of 5, optional)</legend>
           {CATEGORY_RATINGS[form.category].map((key) => (
-            <label key={key} className="block text-xs text-[#F0EDE8]/60">
+            <label key={key} className="block text-xs text-ink/60">
               {RATING_LABELS[key]}
               <select
                 value={form.ratings[key] ?? ""}
@@ -229,7 +229,7 @@ export function GemManager() {
               </select>
             </label>
           ))}
-          <label className="block text-xs text-[#F0EDE8]/60">
+          <label className="block text-xs text-ink/60">
             Price
             <select
               value={form.price}
@@ -285,12 +285,12 @@ export function GemManager() {
             <img
               src={form.photoUrl}
               alt="Gem preview"
-              className="mt-2 aspect-[4/3] w-full rounded-md border border-[#2A2A2A] object-cover"
+              className="mt-2 aspect-[4/3] w-full rounded-md border border-line object-cover"
             />
           )}
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <label
-              className={`cursor-pointer rounded-md border border-[#F5C518]/40 px-3 py-1.5 text-xs font-semibold text-[#F5C518] hover:bg-[#F5C518]/10 ${
+              className={`cursor-pointer rounded-md border border-accent/40 px-3 py-1.5 text-xs font-semibold text-accent hover:bg-accent/10 ${
                 uploading ? "pointer-events-none opacity-50" : ""
               }`}
             >
@@ -338,7 +338,7 @@ export function GemManager() {
           <button
             type="submit"
             disabled={saving || uploading}
-            className="rounded-md bg-[#F5C518] px-4 py-2 text-sm font-semibold text-[#0A0A0A] disabled:opacity-50"
+            className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-bg disabled:opacity-50"
           >
             {saving ? "Saving..." : editingId ? "Save changes" : "Add gem"}
           </button>
@@ -346,24 +346,24 @@ export function GemManager() {
             <button
               type="button"
               onClick={reset}
-              className="rounded-md border border-[#2A2A2A] px-4 py-2 text-sm text-[#F0EDE8]/70 hover:bg-white/5"
+              className="rounded-md border border-line px-4 py-2 text-sm text-ink/70 hover:bg-ink/5"
             >
               Cancel
             </button>
           )}
         </div>
-        {message && <p className="mt-3 break-all text-xs text-[#F0EDE8]/70">{message}</p>}
+        {message && <p className="mt-3 break-all text-xs text-ink/70">{message}</p>}
       </form>
 
-      <h3 className="mb-3 text-sm font-semibold tracking-wide text-[#F5C518]">All gems</h3>
+      <h3 className="mb-3 text-sm font-semibold tracking-wide text-accent">All gems</h3>
       {loadError && <p className="text-sm text-red-400">{loadError}</p>}
-      {!gems && !loadError && <p className="text-sm text-[#F0EDE8]/50">Loading...</p>}
-      {gems && gems.length === 0 && <p className="text-sm text-[#F0EDE8]/50">No gems yet.</p>}
+      {!gems && !loadError && <p className="text-sm text-ink/60">Loading...</p>}
+      {gems && gems.length === 0 && <p className="text-sm text-ink/60">No gems yet.</p>}
       {gems && gems.length > 0 && (
-        <ul className="max-w-2xl divide-y divide-[#2A2A2A] rounded-xl border border-[#2A2A2A]">
+        <ul className="max-w-2xl divide-y divide-line rounded-xl border border-line">
           {gems.map((g) => (
-            <li key={g.id} className={`flex items-center gap-3 p-3 ${editingId === g.id ? "bg-[#F5C518]/5" : ""}`}>
-              <div className="h-12 w-16 shrink-0 overflow-hidden rounded bg-black/40">
+            <li key={g.id} className={`flex items-center gap-3 p-3 ${editingId === g.id ? "bg-accent/5" : ""}`}>
+              <div className="h-12 w-16 shrink-0 overflow-hidden rounded bg-bg/60">
                 {g.photo_url && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={g.photo_url} alt="" className="h-full w-full object-cover" />
@@ -371,7 +371,7 @@ export function GemManager() {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium">{g.name}</p>
-                <p className="truncate text-xs text-[#F0EDE8]/50">
+                <p className="truncate text-xs text-ink/60">
                   {CATEGORY_META[g.category].label}
                   {g.neighborhood ? ` · ${g.neighborhood}` : ""}
                   {g.photo_url ? "" : " · no photo"}
@@ -380,7 +380,7 @@ export function GemManager() {
               <button
                 type="button"
                 onClick={() => startEdit(g)}
-                className="rounded border border-[#F5C518]/40 px-2.5 py-1 text-xs text-[#F5C518] hover:bg-[#F5C518]/10"
+                className="rounded border border-accent/40 px-2.5 py-1 text-xs text-accent hover:bg-accent/10"
               >
                 Edit
               </button>

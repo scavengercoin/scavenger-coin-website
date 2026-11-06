@@ -23,7 +23,7 @@ export function CyclingPhrase() {
 
   return (
     <span
-      className="inline-block min-w-[4.5em] text-[#F5C518] transition-opacity duration-300"
+      className="inline-block min-w-[4.5em] text-accent transition-opacity duration-300"
       style={{ opacity: visible ? 1 : 0 }}
     >
       {PHRASES[index]}

@@ -37,12 +37,12 @@ export function CountdownTimer({ dropsAt }: { dropsAt: string }) {
       {units.map((u) => (
         <div
           key={u.label}
-          className="flex w-16 flex-col items-center rounded-md border border-[#2A2A2A] bg-black/40 py-2 sm:w-20"
+          className="flex w-16 flex-col items-center rounded-md border border-line bg-bg/60 py-2 sm:w-20"
         >
-          <span className="font-mono text-2xl font-semibold text-[#F5C518] tabular-nums sm:text-3xl">
+          <span className="font-mono text-2xl font-semibold text-accent tabular-nums sm:text-3xl">
             {u.value === undefined ? "--" : String(u.value).padStart(2, "0")}
           </span>
-          <span className="mt-1 text-[10px] tracking-widest text-[#F0EDE8]/50">{u.label}</span>
+          <span className="mt-1 text-[10px] tracking-widest text-ink/60">{u.label}</span>
         </div>
       ))}
     </div>

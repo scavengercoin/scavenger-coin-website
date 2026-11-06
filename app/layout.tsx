@@ -3,6 +3,7 @@ import { Inter, Bebas_Neue, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { SolanaWalletProvider } from "@/components/SolanaWalletProvider";
 import { TickerBar } from "@/components/TickerBar";
+import { SiteHeader } from "@/components/SiteHeader";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -21,7 +22,10 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Scavenger Coin ($SCAV)",
+  title: {
+    default: "The Scavenger NYC",
+    template: "%s | The Scavenger NYC",
+  },
   description:
     "A weekly NYC neighborhood spotlight, with a physical coin hidden in each. Find it, scan the QR, claim your SCAV.",
   icons: {
@@ -39,8 +43,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${inter.variable} ${bebasNeue.variable} ${jetbrainsMono.variable} h-full scroll-smooth antialiased`}
     >
-      <body className="flex min-h-full flex-col bg-[#0A0A0A] text-[#F0EDE8]">
+      <body className="flex min-h-full flex-col bg-bg text-ink">
         <TickerBar />
+        <SiteHeader />
         <SolanaWalletProvider>{children}</SolanaWalletProvider>
       </body>
     </html>

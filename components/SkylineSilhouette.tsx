@@ -10,9 +10,9 @@ const VIEW_H = 240;
 const BASELINE = 220;
 // Buildings stay one near-invisible shade — a silhouette suggestion, not a
 // feature in their own right. The gold logo glow is the hero's focal point.
-const BUILDING_FILL = "#111111";
-const WINDOW_GOLD = "#FF6B1A";
-const WINDOW_BLUE = "#B34700";
+const BUILDING_FILL = "var(--scav-bg-deep)";
+const WINDOW_GOLD = "var(--scav-accent)";
+const WINDOW_BLUE = "var(--scav-border)";
 
 
 
@@ -191,8 +191,8 @@ export function SkylineSilhouette() {
             gradient here, just enough of a fade so the building bases don't
             hard-cut against the reflection strip below. */}
         <linearGradient id="waterGradient" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#111111" stopOpacity="0.4" />
-          <stop offset="100%" stopColor="#0A0A0A" stopOpacity="0" />
+          <stop offset="0%" stopColor="var(--scav-bg-deep)" stopOpacity="0.4" />
+          <stop offset="100%" stopColor="var(--scav-bg)" stopOpacity="0" />
         </linearGradient>
       </defs>
 

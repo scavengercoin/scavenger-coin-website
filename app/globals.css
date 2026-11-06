@@ -1,22 +1,32 @@
 @import "tailwindcss";
 
+/* The Scavenger NYC palette (navy + gold). Change colors here and nothing else.
+   Components use the Tailwind names below (bg-bg, bg-surface, border-line,
+   text-accent, text-ink), never raw hex. */
 :root {
-  --color-bg: #0a0a0a;
-  --color-gold: #f5c518;
-  --color-ink: #f0ede8;
-  --color-card: #141414;
-  --color-border: #2a2a2a;
+  --scav-bg: #0a1022; /* page background */
+  --scav-surface: #12244a; /* cards, panels */
+  --scav-border: #26447a; /* borders, secondary */
+  --scav-accent: #e2b24a; /* buttons, links, highlights */
+  --scav-text: #f6f2e8; /* body text */
+  /* Derived: darker than the page, for the skyline silhouette only. */
+  --scav-bg-deep: #060b18;
 }
 
 @theme inline {
-  --color-background: var(--color-bg);
-  --color-foreground: var(--color-ink);
-  --color-gold: var(--color-gold);
-  --color-card: var(--color-card);
-  --color-line: var(--color-border);
+  --color-bg: var(--scav-bg);
+  --color-surface: var(--scav-surface);
+  --color-line: var(--scav-border);
+  --color-accent: var(--scav-accent);
+  --color-ink: var(--scav-text);
   --font-sans: var(--font-inter);
   --font-display: var(--font-bebas);
   --font-mono: var(--font-mono);
+}
+
+html {
+  background: var(--scav-bg);
+  color-scheme: dark;
 }
 
 body {
@@ -68,10 +78,10 @@ body {
 /* Pulsing ring for the claim reveal */
 @keyframes pulse-ring {
   0% {
-    box-shadow: 0 0 0 0 rgba(245, 197, 24, 0.55);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--scav-accent) 55%, transparent);
   }
   100% {
-    box-shadow: 0 0 0 28px rgba(245, 197, 24, 0);
+    box-shadow: 0 0 0 28px color-mix(in srgb, var(--scav-accent) 0%, transparent);
   }
 }
 
@@ -141,4 +151,33 @@ body {
   .ticker-track {
     animation: none;
   }
+}
+
+/* Wallet button + modal (library defaults are purple/gray). The html prefix
+   raises specificity so these win regardless of stylesheet load order. */
+html .wallet-adapter-button.wallet-adapter-button-trigger {
+  background-color: var(--scav-accent);
+  color: var(--scav-bg);
+}
+
+html .wallet-adapter-button.wallet-adapter-button-trigger:not([disabled]):hover {
+  background-color: var(--scav-accent);
+  filter: brightness(1.1);
+}
+
+html .wallet-adapter-button:not([disabled]):hover {
+  background-color: var(--scav-border);
+}
+
+html .wallet-adapter-modal-wrapper {
+  background: var(--scav-surface);
+}
+
+html .wallet-adapter-modal-title,
+html .wallet-adapter-modal-list .wallet-adapter-button {
+  color: var(--scav-text);
+}
+
+html .wallet-adapter-modal-button-close {
+  background: var(--scav-border);
 }

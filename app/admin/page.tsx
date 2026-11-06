@@ -151,7 +151,7 @@ export default function AdminPage() {
     }) ?? [];
 
   return (
-    <main className="min-h-screen bg-[#0A0A0A] p-6 text-[#F0EDE8] sm:p-10">
+    <main className="min-h-screen bg-bg p-6 text-ink sm:p-10">
       <h1 className="font-display mb-8 text-3xl">SCAV ADMIN</h1>
 
       {needsReview.length > 0 && (
@@ -172,9 +172,9 @@ export default function AdminPage() {
       <section className="mb-10">
         <form
           onSubmit={handleCreate}
-          className="max-w-md rounded-xl border border-[#2A2A2A] bg-[#141414] p-5"
+          className="max-w-md rounded-xl border border-line bg-surface p-5"
         >
-          <h2 className="mb-4 text-sm font-semibold tracking-wide text-[#F5C518]">
+          <h2 className="mb-4 text-sm font-semibold tracking-wide text-accent">
             New claim code
           </h2>
           <label className="mb-3 block text-sm">
@@ -184,7 +184,7 @@ export default function AdminPage() {
               value={newWeek}
               onChange={(e) => setNewWeek(e.target.value)}
               placeholder="hunt-002"
-              className="mt-1 w-full rounded-md border border-[#2A2A2A] bg-black/40 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-md border border-ink/40 bg-bg/60 px-3 py-2 text-sm"
             />
           </label>
           <label className="mb-4 block text-sm">
@@ -195,18 +195,18 @@ export default function AdminPage() {
               min={1}
               value={newReward}
               onChange={(e) => setNewReward(Number(e.target.value))}
-              className="mt-1 w-full rounded-md border border-[#2A2A2A] bg-black/40 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-md border border-ink/40 bg-bg/60 px-3 py-2 text-sm"
             />
           </label>
           <button
             type="submit"
             disabled={creating}
-            className="rounded-md bg-[#F5C518] px-4 py-2 text-sm font-semibold text-[#0A0A0A] disabled:opacity-50"
+            className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-bg disabled:opacity-50"
           >
             {creating ? "Creating..." : "Create code"}
           </button>
           {createResult && (
-            <p className="mt-3 break-all text-xs text-[#F0EDE8]/70">{createResult}</p>
+            <p className="mt-3 break-all text-xs text-ink/70">{createResult}</p>
           )}
         </form>
       </section>
@@ -214,15 +214,15 @@ export default function AdminPage() {
       <GemManager />
 
       <section>
-        <h2 className="mb-4 text-sm font-semibold tracking-wide text-[#F5C518]">
+        <h2 className="mb-4 text-sm font-semibold tracking-wide text-accent">
           All claim codes
         </h2>
         {loadError && <p className="text-sm text-red-400">{loadError}</p>}
-        {!coins && !loadError && <p className="text-sm text-[#F0EDE8]/50">Loading...</p>}
+        {!coins && !loadError && <p className="text-sm text-ink/60">Loading...</p>}
         {coins && (
-          <div className="overflow-x-auto rounded-xl border border-[#2A2A2A]">
+          <div className="overflow-x-auto rounded-xl border border-line">
             <table className="w-full min-w-[1100px] text-left text-xs">
-              <thead className="bg-[#141414] text-[#F0EDE8]/50">
+              <thead className="bg-surface text-ink/60">
                 <tr>
                   <th className="p-3">Code</th>
                   <th className="p-3">Week</th>
@@ -247,12 +247,12 @@ export default function AdminPage() {
                   return (
                     <tr
                       key={c.code}
-                      className={`border-t border-[#2A2A2A] ${flagged ? "bg-red-400/10" : ""}`}
+                      className={`border-t border-line ${flagged ? "bg-red-400/10" : ""}`}
                     >
                       <td className="p-3 font-mono">{c.code}</td>
                       <td className="p-3">{c.week ?? "—"}</td>
                       <td className="p-3">
-                        <span className={c.status === "unclaimed" ? "text-[#F5C518]" : "text-[#F0EDE8]/50"}>
+                        <span className={c.status === "unclaimed" ? "text-accent" : "text-ink/60"}>
                           {c.status}
                         </span>
                         {state.claimStatus === "pending_review" && (
@@ -267,10 +267,10 @@ export default function AdminPage() {
                       </td>
                       <td className="p-3">{fmtDate(c.claimed_at)}</td>
                       <td className="p-3">
-                        {state.bonusStatus === "none" && <span className="text-[#F0EDE8]/40">not sent</span>}
-                        {state.bonusStatus === "pending" && <span className="text-[#F5C518]">sending…</span>}
+                        {state.bonusStatus === "none" && <span className="text-ink/60">not sent</span>}
+                        {state.bonusStatus === "pending" && <span className="text-accent">sending…</span>}
                         {state.bonusStatus === "sent" && (
-                          <span className="text-[#F0EDE8]/50" title={state.bonusSig ?? ""}>
+                          <span className="text-ink/60" title={state.bonusSig ?? ""}>
                             ✓ sent {truncate(state.bonusSig ?? "")}
                           </span>
                         )}
@@ -295,7 +295,7 @@ export default function AdminPage() {
                             <button
                               onClick={() => handleBonus(c.code)}
                               disabled={busyCode === c.code}
-                              className="rounded border border-[#F5C518]/40 px-2 py-1 text-[#F5C518] hover:bg-[#F5C518]/10 disabled:opacity-50"
+                              className="rounded border border-accent/40 px-2 py-1 text-accent hover:bg-accent/10 disabled:opacity-50"
                             >
                               Send bonus
                             </button>

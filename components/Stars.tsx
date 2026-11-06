@@ -10,7 +10,7 @@ export function Stars() {
       {STARS.map((s, i) => (
         <span
           key={i}
-          className="twinkle absolute rounded-full bg-[#E8F0FF]"
+          className="twinkle absolute rounded-full bg-ink"
           style={{
             top: s.top,
             left: "left" in s ? s.left : undefined,

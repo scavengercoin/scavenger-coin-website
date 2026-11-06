@@ -22,8 +22,8 @@ const FILTERS: { value: Filter; label: string }[] = [
 function Stars({ value }: { value: number }) {
   return (
     <span aria-hidden className="tracking-[0.15em]">
-      <span className="text-[#F5C518]">{"★".repeat(value)}</span>
-      <span className="text-[#F0EDE8]/20">{"★".repeat(5 - value)}</span>
+      <span className="text-accent">{"★".repeat(value)}</span>
+      <span className="text-ink/40">{"★".repeat(5 - value)}</span>
     </span>
   );
 }
@@ -31,8 +31,8 @@ function Stars({ value }: { value: number }) {
 function Dollars({ value }: { value: number }) {
   return (
     <span aria-hidden className="font-semibold tracking-wider">
-      <span className="text-[#F5C518]">{"$".repeat(value)}</span>
-      <span className="text-[#F0EDE8]/20">{"$".repeat(5 - value)}</span>
+      <span className="text-accent">{"$".repeat(value)}</span>
+      <span className="text-ink/40">{"$".repeat(5 - value)}</span>
     </span>
   );
 }
@@ -44,7 +44,7 @@ function Ratings({ gem }: { gem: Gem }) {
     <dl className="mt-1 grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-1 text-xs">
       {rows.map((key) => (
         <div key={key} className="contents">
-          <dt className="text-[#F0EDE8]/50">{RATING_LABELS[key]}</dt>
+          <dt className="text-ink/60">{RATING_LABELS[key]}</dt>
           <dd className="text-sm" aria-label={`${RATING_LABELS[key]}: ${gem.ratings![key]} out of 5`}>
             <Stars value={gem.ratings![key]!} />
           </dd>
@@ -52,7 +52,7 @@ function Ratings({ gem }: { gem: Gem }) {
       ))}
       {gem.price ? (
         <div className="contents">
-          <dt className="text-[#F0EDE8]/50">Price</dt>
+          <dt className="text-ink/60">Price</dt>
           <dd className="text-sm" aria-label={`Price: ${gem.price} out of 5`}>
             <Dollars value={gem.price} />
           </dd>
@@ -65,8 +65,8 @@ function Ratings({ gem }: { gem: Gem }) {
 function GemCard({ gem }: { gem: Gem }) {
   const meta = CATEGORY_META[gem.category];
   return (
-    <article className="flex flex-col overflow-hidden rounded-xl border border-[#2A2A2A] bg-[#141414] transition hover:border-[#F5C518]/40">
-      <div className="relative aspect-[4/3] bg-gradient-to-br from-[#1B1608] to-[#0A0A0A]">
+    <article className="flex flex-col overflow-hidden rounded-xl border border-line bg-surface transition hover:border-accent/40">
+      <div className="relative aspect-[4/3] bg-gradient-to-br from-surface to-bg">
         {gem.photo_url ? (
           // Plain <img>: photo URLs can point at any host, so next/image's
           // remotePatterns allowlist doesn't fit here.
@@ -89,7 +89,7 @@ function GemCard({ gem }: { gem: Gem }) {
             />
           </div>
         )}
-        <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full border border-[#F5C518]/30 bg-[#0A0A0A]/80 px-2.5 py-1 text-[11px] font-semibold tracking-widest text-[#F5C518] backdrop-blur">
+        <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-bg/80 px-2.5 py-1 text-[11px] font-semibold tracking-widest text-accent backdrop-blur">
           <span aria-hidden>{meta.emoji}</span>
           {meta.label.toUpperCase()}
         </span>
@@ -98,8 +98,8 @@ function GemCard({ gem }: { gem: Gem }) {
       <div className="flex flex-1 flex-col gap-2 p-5">
         <h3 className="font-display text-2xl leading-tight">{gem.name}</h3>
         {(gem.neighborhood || gem.address) && (
-          <p className="text-xs text-[#F0EDE8]/50">
-            {gem.neighborhood && <span className="font-medium text-[#F0EDE8]/70">{gem.neighborhood}</span>}
+          <p className="text-xs text-ink/60">
+            {gem.neighborhood && <span className="font-medium text-ink/70">{gem.neighborhood}</span>}
             {gem.neighborhood && gem.address && " · "}
             {gem.address && (
               <a
@@ -108,7 +108,7 @@ function GemCard({ gem }: { gem: Gem }) {
                 )}`}
                 target="_blank"
                 rel="noreferrer"
-                className="underline-offset-2 transition hover:text-[#F5C518] hover:underline"
+                className="underline-offset-2 transition hover:text-accent hover:underline"
               >
                 {gem.address}
               </a>
@@ -116,13 +116,13 @@ function GemCard({ gem }: { gem: Gem }) {
           </p>
         )}
         {gem.description && (
-          <p className="line-clamp-4 text-sm leading-relaxed text-[#F0EDE8]/60">{gem.description}</p>
+          <p className="line-clamp-4 text-sm leading-relaxed text-ink/60">{gem.description}</p>
         )}
         <Ratings gem={gem} />
         {gem.hunt_week && (
           <p className="mt-auto pt-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#2A2A2A] bg-black/40 px-2.5 py-1 text-[11px] font-medium tracking-wide text-[#F0EDE8]/70">
-              <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-[#F5C518]" />
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-bg/60 px-2.5 py-1 text-[11px] font-medium tracking-wide text-ink/70">
+              <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-accent" />
               {spotlightLabel(gem.hunt_week)}
             </span>
           </p>
@@ -154,7 +154,7 @@ export function GemsBrowser({ gems }: { gems: Gem[] }) {
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search by name, neighborhood or vibe..."
           aria-label="Search hidden gems"
-          className="w-full rounded-full border border-[#2A2A2A] bg-[#141414] px-5 py-3 text-sm text-[#F0EDE8] placeholder:text-[#F0EDE8]/30 focus:border-[#F5C518]/60 focus:outline-none"
+          className="w-full rounded-full border border-ink/40 bg-surface px-5 py-3 text-sm text-ink placeholder:text-ink/60 focus:border-accent focus:outline-none"
         />
         <div className="flex flex-wrap gap-2" role="group" aria-label="Filter by category">
           {FILTERS.map((f) => {
@@ -167,8 +167,8 @@ export function GemsBrowser({ gems }: { gems: Gem[] }) {
                 onClick={() => setFilter(f.value)}
                 className={`rounded-full border px-4 py-1.5 text-xs font-semibold tracking-wide transition ${
                   active
-                    ? "border-[#F5C518] bg-[#F5C518] text-[#0A0A0A]"
-                    : "border-[#2A2A2A] bg-[#141414] text-[#F0EDE8]/60 hover:border-[#F5C518]/40 hover:text-[#F0EDE8]"
+                    ? "border-accent bg-accent text-bg"
+                    : "border-line bg-surface text-ink/60 hover:border-accent/40 hover:text-ink"
                 }`}
               >
                 {f.label}
@@ -193,7 +193,7 @@ export function GemsBrowser({ gems }: { gems: Gem[] }) {
             height={72}
             className="rounded-full opacity-50 grayscale"
           />
-          <p className="text-sm text-[#F0EDE8]/50">
+          <p className="text-sm text-ink/60">
             {gems.length === 0
               ? "No gems yet. We're still scouting."
               : "Nothing matches that. Try a different search."}
