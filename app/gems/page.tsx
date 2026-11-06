@@ -8,7 +8,7 @@ import type { Gem } from "@/lib/gems";
 export const metadata: Metadata = {
   title: "Hidden Gems | Scavenger Coin ($SCAV)",
   description:
-    "Our favorite NYC cafes, lunch spots, dinner spots, bars, sunset views and landmarks, featured alongside each week's hunt.",
+    "Our favorite NYC cafes, lunch spots, dinner spots, bars, sunset views and landmarks, featured alongside each week's Neighborhood Spotlight.",
 };
 
 // Gems are added from /admin without a redeploy, so render per request
@@ -47,13 +47,13 @@ export default async function GemsPage() {
           <h1 className="font-display text-5xl leading-none sm:text-7xl">HIDDEN GEMS</h1>
           <p className="text-balance text-sm text-[#F0EDE8]/60 sm:text-base">
             We know all the best spots in the city. Cafes, lunch counters, dinner tables, bars and views,
-            all featured alongside the weekly hunt.
+            all featured alongside each week&apos;s Neighborhood Spotlight.
           </p>
           <Link
             href="/"
             className="text-xs font-medium tracking-widest text-[#F0EDE8]/40 transition hover:text-[#F5C518]"
           >
-            ← BACK TO THE HUNT
+            ← BACK TO HOME
           </Link>
         </div>
       </header>

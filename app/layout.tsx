@@ -22,7 +22,8 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: "Scavenger Coin ($SCAV)",
-  description: "A crypto scavenger hunt across NYC. Find a coin, scan the QR, claim your SCAV.",
+  description:
+    "A weekly NYC neighborhood spotlight, with a physical coin hidden in each. Find it, scan the QR, claim your SCAV.",
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "32x32", type: "image/x-icon" },

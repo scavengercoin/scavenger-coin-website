@@ -56,11 +56,9 @@ export function isGemCategory(value: unknown): value is GemCategory {
   return typeof value === "string" && (GEM_CATEGORIES as readonly string[]).includes(value);
 }
 
-// hunt_week uses the same labels as coins.week ("hunt-002"), so show those as
-// "Hunt #2"; anything without a number is shown as typed.
-export function huntLabel(week: string): string {
-  const m = week.match(/\d+/);
-  return m ? `Hunt #${parseInt(m[0], 10)}` : week;
+// hunt_week holds the spotlight a gem was featured in, e.g. "Chelsea".
+export function spotlightLabel(week: string): string {
+  return `Spotlight: ${week}`;
 }
 
 // Keep only known keys with whole-number values from 1 to 5.

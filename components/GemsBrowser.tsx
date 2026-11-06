@@ -7,7 +7,7 @@ import {
   GEM_CATEGORIES,
   RATING_KEYS,
   RATING_LABELS,
-  huntLabel,
+  spotlightLabel,
   type Gem,
   type GemCategory,
 } from "@/lib/gems";
@@ -123,7 +123,7 @@ function GemCard({ gem }: { gem: Gem }) {
           <p className="mt-auto pt-2">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-[#2A2A2A] bg-black/40 px-2.5 py-1 text-[11px] font-medium tracking-wide text-[#F0EDE8]/70">
               <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-[#F5C518]" />
-              Featured in {huntLabel(gem.hunt_week)}
+              {spotlightLabel(gem.hunt_week)}
             </span>
           </p>
         )}

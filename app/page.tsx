@@ -13,8 +13,8 @@ import { currentHunt } from "@/content/current-hunt";
 const STEPS = [
   {
     n: "01",
-    title: "FOLLOW THE CLUES",
-    body: "Every Monday we drop a new clue pointing somewhere in NYC. Follow it, decode it, narrow it down.",
+    title: "EXPLORE THE NEIGHBORHOOD",
+    body: "Every Saturday we spotlight a new NYC neighborhood. Explore it, find the spots, and hunt down the coin.",
   },
   {
     n: "02",
@@ -67,7 +67,7 @@ export default function Home() {
             priority
           />
           <h1 className="font-display text-6xl leading-none text-[#F0EDE8] sm:text-8xl">
-            THE HUNT IS ON
+            THIS WEEK: {currentHunt.neighborhood.toUpperCase()}
           </h1>
           <p className="max-w-md text-balance text-base text-[#F0EDE8]/60 sm:max-w-xl sm:text-lg">
             Every week, a physical Scavenger Coin is hidden somewhere in NYC.{" "}
@@ -107,7 +107,7 @@ export default function Home() {
         </section>
       </FadeIn>
 
-      {/* CURRENT HUNT — mission dossier */}
+      {/* CURRENT SPOTLIGHT — mission dossier */}
       <FadeIn>
         <section className="mx-auto max-w-3xl px-6 py-20 sm:py-28">
           <div className="rounded-2xl border border-[#2A2A2A] bg-[#141414] p-6 sm:p-10">
@@ -116,22 +116,19 @@ export default function Home() {
                 <span className="h-1.5 w-1.5 rounded-full bg-[#F5C518]" />
                 {currentHunt.status}
               </span>
-              <span className="font-mono text-xs tracking-widest text-[#F0EDE8]/40">
-                CLUE {currentHunt.weekNumber} WEEK {currentHunt.weekNumber}
-              </span>
             </div>
 
             <p className="mb-2 text-xs uppercase tracking-widest text-[#F0EDE8]/40">
-              Current clue
+              This week&apos;s neighborhood
             </p>
             <p className="font-display mb-8 text-2xl leading-tight text-[#F0EDE8] sm:text-3xl">
-              &ldquo;{currentHunt.clue}&rdquo;
+              {currentHunt.neighborhood}
             </p>
 
             <p className="mb-3 text-xs uppercase tracking-widest text-[#F0EDE8]/40">
-              Next clue drops in
+              Coin drops in
             </p>
-            <CountdownTimer />
+            <CountdownTimer dropsAt={currentHunt.dropsAt} />
           </div>
         </section>
       </FadeIn>

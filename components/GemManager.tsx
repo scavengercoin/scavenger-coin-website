@@ -324,12 +324,12 @@ export function GemManager() {
         </div>
 
         <label className="mb-4 block text-sm">
-          Hunt week (optional)
+          Spotlight (optional)
           <input
             maxLength={60}
             value={form.huntWeek}
             onChange={(e) => setForm({ ...form, huntWeek: e.target.value })}
-            placeholder="hunt-002"
+            placeholder="Chelsea"
             className={inputClass}
           />
         </label>

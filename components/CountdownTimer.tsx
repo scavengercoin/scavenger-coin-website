@@ -2,17 +2,6 @@
 
 import { useEffect, useState } from "react";
 
-// Clues drop every Monday at 12:00 local time.
-function nextDropDate(): Date {
-  const now = new Date();
-  const next = new Date(now);
-  next.setHours(12, 0, 0, 0);
-  const daysUntilMonday = (1 - now.getDay() + 7) % 7;
-  next.setDate(now.getDate() + daysUntilMonday);
-  if (next <= now) next.setDate(next.getDate() + 7);
-  return next;
-}
-
 function getRemaining(target: Date) {
   const diff = Math.max(0, target.getTime() - Date.now());
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -22,8 +11,8 @@ function getRemaining(target: Date) {
   return { days, hours, minutes, seconds };
 }
 
-export function CountdownTimer() {
-  const [target] = useState(nextDropDate);
+export function CountdownTimer({ dropsAt }: { dropsAt: string }) {
+  const [target] = useState(() => new Date(dropsAt));
   // Date.now() at render time would differ between the server render and the
   // client hydration render, causing a hydration mismatch — so the real
   // countdown is only computed after mount, once there's no SSR pass to match.
