@@ -1,11 +1,11 @@
 const FAQS = [
   {
     q: "What is $SCAV?",
-    a: "SCAV is the token behind Scavenger Coin — a real crypto scavenger hunt across NYC. Each week a physical coin is hidden somewhere in the city. Whoever finds it and scans the QR code claims SCAV tokens straight to their wallet.",
+    a: "SCAV is the reward token for The Scavenger NYC's weekly coin hunt. Each week a physical coin is hidden somewhere in the city. Whoever finds it and scans the QR code claims SCAV straight to their wallet.",
   },
   {
     q: "What is a Solana wallet?",
-    a: "A Solana wallet is an app that holds your crypto and lets you sign transactions. It's free to set up and takes about a minute — you don't need to buy anything to receive SCAV.",
+    a: "A Solana wallet is an app that holds your crypto and lets you sign transactions. It's free and takes about a minute to set up. You don't need to buy anything to receive SCAV.",
   },
   {
     q: "How do I set up Phantom?",
