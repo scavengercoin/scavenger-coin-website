@@ -16,7 +16,7 @@ import {
 } from "@/lib/token";
 
 export const metadata: Metadata = {
-  title: "SCAV Token",
+  title: "Scavenger Coin",
   description:
     "Official details for SCAV, the reward token for The Scavenger NYC hunts: mint address, supply, the official pool, and every project wallet.",
 };
@@ -55,7 +55,7 @@ export default async function TokenPage() {
     <main className="flex-1 bg-bg text-ink">
       <header className="border-b border-line bg-gradient-to-b from-surface to-bg px-6 pb-10 pt-12 text-center sm:pb-14 sm:pt-16">
         <div className="mx-auto flex max-w-2xl flex-col items-center gap-4">
-          <h1 className="font-display text-5xl leading-none sm:text-7xl">SCAV TOKEN</h1>
+          <h1 className="font-display text-5xl leading-none sm:text-7xl">SCAVENGER COIN</h1>
           <p className="text-balance text-sm text-ink/60 sm:text-base">
             SCAV is the reward token for The Scavenger NYC hunts. This page is the official reference for
             the token, its pool, and every wallet we control.
