@@ -71,6 +71,13 @@ export default function Home() {
           >
             Found a coin? Scan it to claim
           </Link>
+          <Link
+            href="/token"
+            aria-label="$SCAV token details"
+            className="rounded-full border border-accent/60 bg-bg/80 px-6 py-2 text-sm font-semibold tracking-widest text-accent backdrop-blur transition hover:border-accent hover:bg-accent hover:text-bg"
+          >
+            $SCAV
+          </Link>
         </div>
 
         <SkylineSilhouette />
