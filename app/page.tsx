@@ -160,6 +160,12 @@ export default function Home() {
           >
             HIDDEN GEMS
           </Link>
+          <Link
+            href="/token"
+            className="text-xs font-medium tracking-widest text-ink/60 transition hover:text-accent"
+          >
+            SCAV TOKEN
+          </Link>
           <p className="break-all font-mono text-[11px] text-ink/60">{MINT_ADDRESS}</p>
           <a
             href="mailto:support@scavengercoin.com"
