@@ -33,7 +33,7 @@ export const CATEGORY_RATINGS: Record<GemCategory, RatingKey[]> = {
   cafe: ["coffee", "pastries", "ambiance", "overall"],
   lunch: ["food", "drinks", "ambiance", "overall"],
   dinner: ["food", "drinks", "ambiance", "overall"],
-  bar: ["drinks", "ambiance", "overall"],
+  bar: ["food", "drinks", "ambiance", "overall"],
   sunset: ["beauty", "novelty", "overall"],
   landmark: ["beauty", "novelty", "overall"],
 };
@@ -49,6 +49,8 @@ export type Gem = {
   hunt_week: string | null;
   ratings: Ratings | null;
   price: number | null; // tier 1-4, shown as $ to $$$$
+  // "Certified Hidden Gem": our top pick status. Any category can have it.
+  certified?: boolean | null;
   lat: number | null;
   lng: number | null;
   created_at: string;
@@ -57,6 +59,8 @@ export type Gem = {
 export function isGemCategory(value: unknown): value is GemCategory {
   return typeof value === "string" && (GEM_CATEGORIES as readonly string[]).includes(value);
 }
+
+export const CERTIFIED_LABEL = "Certified Hidden Gem";
 
 // hunt_week holds the spotlight a gem was featured in, e.g. "Chelsea".
 export function spotlightLabel(week: string): string {

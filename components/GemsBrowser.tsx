@@ -5,6 +5,7 @@ import Image from "next/image";
 import {
   CATEGORY_META,
   CATEGORY_RATINGS,
+  CERTIFIED_LABEL,
   GEM_CATEGORIES,
   RATING_LABELS,
   spotlightLabel,
@@ -25,6 +26,14 @@ function Stars({ value }: { value: number }) {
       <span className="text-accent">{"★".repeat(value)}</span>
       <span className="text-ink/40">{"★".repeat(5 - value)}</span>
     </span>
+  );
+}
+
+function StarIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden className={className}>
+      <path d="M12 2.5l2.9 6.1 6.6.9-4.8 4.6 1.2 6.6L12 17.5l-5.9 3.2 1.2-6.6L2.5 9.5l6.6-.9L12 2.5z" />
+    </svg>
   );
 }
 
@@ -100,6 +109,16 @@ function GemCard({ gem }: { gem: Gem }) {
           <span aria-hidden>{meta.emoji}</span>
           {meta.label.toUpperCase()}
         </span>
+        {gem.certified && (
+          <span
+            role="img"
+            aria-label={CERTIFIED_LABEL}
+            title={CERTIFIED_LABEL}
+            className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full border-2 border-bg bg-accent text-bg shadow-lg shadow-black/40 ring-2 ring-accent/60"
+          >
+            <StarIcon className="h-5 w-5" />
+          </span>
+        )}
       </div>
 
       <h3 className="font-display px-5 pt-5 text-2xl leading-tight">{gem.name}</h3>
@@ -143,15 +162,20 @@ function GemCard({ gem }: { gem: Gem }) {
 export function GemsBrowser({ gems }: { gems: Gem[] }) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
+  const [certifiedOnly, setCertifiedOnly] = useState(false);
+  const certifiedCount = useMemo(() => gems.filter((g) => g.certified).length, [gems]);
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
     return gems.filter((g) => {
+      if (certifiedOnly && !g.certified) return false;
       if (filter !== "all" && g.category !== filter) return false;
       if (!q) return true;
-      return [g.name, g.description, g.neighborhood].some((field) => field?.toLowerCase().includes(q));
+      // Typing "certified" finds certified gems too, not just the filter button.
+      const fields = [g.name, g.description, g.neighborhood, g.certified ? CERTIFIED_LABEL : null];
+      return fields.some((field) => field?.toLowerCase().includes(q));
     });
-  }, [gems, query, filter]);
+  }, [gems, query, filter, certifiedOnly]);
 
   return (
     <div>
@@ -165,6 +189,21 @@ export function GemsBrowser({ gems }: { gems: Gem[] }) {
           className="w-full rounded-full border border-ink/40 bg-surface px-5 py-3 text-sm text-ink placeholder:text-ink/60 focus:border-accent focus:outline-none"
         />
         <div className="flex flex-wrap gap-2" role="group" aria-label="Filter by category">
+          {certifiedCount > 0 && (
+            <button
+              type="button"
+              aria-pressed={certifiedOnly}
+              onClick={() => setCertifiedOnly((v) => !v)}
+              className={`inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-xs font-semibold tracking-wide transition ${
+                certifiedOnly
+                  ? "border-accent bg-accent text-bg"
+                  : "border-accent/60 bg-surface text-accent hover:border-accent"
+              }`}
+            >
+              <StarIcon className="h-3.5 w-3.5" />
+              Certified Gems
+            </button>
+          )}
           {FILTERS.map((f) => {
             const active = filter === f.value;
             return (

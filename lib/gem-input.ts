@@ -10,6 +10,7 @@ export type GemFields = {
   hunt_week: string | null;
   ratings: Ratings;
   price: number | null;
+  certified: boolean;
 };
 
 // Trim, cap length, and store blank fields as null rather than "".
@@ -64,6 +65,7 @@ export function parseGemInput(body: unknown): { ok: true; fields: GemFields } | 
       hunt_week: clean(b.huntWeek, 60),
       ratings,
       price,
+      certified: b.certified === true,
     },
   };
 }

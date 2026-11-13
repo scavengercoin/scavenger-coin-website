@@ -5,6 +5,14 @@ import { parseGemInput } from "@/lib/gem-input";
 // Proxy.ts already gates every /api/admin/* route behind ADMIN_PASSWORD
 // (Basic Auth) before requests reach here.
 
+// The "certified" column was added after the table was first created. If a
+// project hasn't run that migration yet, say so instead of a generic failure.
+function saveErrorMessage(error: { message?: string }, fallback: string): string {
+  return error.message?.includes("certified")
+    ? "The database is missing the 'certified' column. Run the hidden_gems certified SQL from docs/supabase-schema.sql in Supabase, then try again."
+    : fallback;
+}
+
 export async function PATCH(req: NextRequest, ctx: RouteContext<"/api/admin/gems/[id]">) {
   const { id } = await ctx.params;
 
@@ -30,7 +38,7 @@ export async function PATCH(req: NextRequest, ctx: RouteContext<"/api/admin/gems
 
   if (error) {
     console.error("Admin gem update error:", error);
-    return NextResponse.json({ error: "Failed to save gem" }, { status: 500 });
+    return NextResponse.json({ error: saveErrorMessage(error, "Failed to save gem") }, { status: 500 });
   }
   if (!data) {
     return NextResponse.json({ error: "Gem not found" }, { status: 404 });

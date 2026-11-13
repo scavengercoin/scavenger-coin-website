@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   CATEGORY_META,
   CATEGORY_RATINGS,
+  CERTIFIED_LABEL,
   GEM_CATEGORIES,
   RATING_LABELS,
   type Gem,
@@ -20,6 +21,7 @@ type FormState = {
   huntWeek: string;
   price: string;
   ratings: Record<string, string>;
+  certified: boolean;
 };
 
 const EMPTY_FORM: FormState = {
@@ -32,6 +34,7 @@ const EMPTY_FORM: FormState = {
   huntWeek: "",
   price: "",
   ratings: {},
+  certified: false,
 };
 
 const MAX_EDGE = 1200;
@@ -47,6 +50,7 @@ function formFromGem(gem: Gem): FormState {
     huntWeek: gem.hunt_week ?? "",
     price: gem.price ? String(gem.price) : "",
     ratings: Object.fromEntries(Object.entries(gem.ratings ?? {}).map(([k, v]) => [k, String(v)])),
+    certified: gem.certified === true,
   };
 }
 
@@ -210,6 +214,22 @@ export function GemManager() {
           </select>
         </label>
 
+        <label className="mb-3 flex cursor-pointer items-center gap-2.5 rounded-md border border-accent/40 bg-accent/5 px-3 py-2.5 text-sm">
+          <input
+            type="checkbox"
+            checked={form.certified}
+            onChange={(e) => setForm({ ...form, certified: e.target.checked })}
+            className="h-4 w-4 accent-[var(--scav-accent)]"
+          />
+          <span>
+            <span aria-hidden className="text-accent">
+              ★
+            </span>{" "}
+            {CERTIFIED_LABEL}
+            <span className="block text-xs text-ink/60">Our top picks. Shows a gold star on the photo.</span>
+          </span>
+        </label>
+
         <fieldset className="mb-3 grid grid-cols-2 gap-3 text-sm">
           <legend className="mb-1">Ratings (stars out of 5, optional)</legend>
           {CATEGORY_RATINGS[form.category].map((key) => (
@@ -370,7 +390,14 @@ export function GemManager() {
                 )}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium">{g.name}</p>
+                <p className="truncate text-sm font-medium">
+                  {g.certified && (
+                    <span title={CERTIFIED_LABEL} className="mr-1 text-accent">
+                      ★
+                    </span>
+                  )}
+                  {g.name}
+                </p>
                 <p className="truncate text-xs text-ink/60">
                   {CATEGORY_META[g.category].label}
                   {g.neighborhood ? ` · ${g.neighborhood}` : ""}
