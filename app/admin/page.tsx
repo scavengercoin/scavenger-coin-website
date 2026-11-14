@@ -9,6 +9,7 @@ type Coin = {
   week: string | null;
   status: "unclaimed" | "claimed";
   reward_amount: number;
+  bonus_amount?: number | null;
   claimed_by: string | null;
   claimed_at: string | null;
   claim_tx: string | null;
@@ -18,6 +19,11 @@ type Coin = {
 function fmtDate(iso: string | null) {
   if (!iso) return "—";
   return new Date(iso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+}
+
+// Codes created before bonus_amount existed fall back to the old global 500.
+function bonusFor(coin: Coin): number {
+  return coin.bonus_amount ?? 500;
 }
 
 function truncate(s: string, n = 12) {
@@ -30,6 +36,7 @@ export default function AdminPage() {
 
   const [newWeek, setNewWeek] = useState("");
   const [newReward, setNewReward] = useState(500);
+  const [newBonus, setNewBonus] = useState(500);
   const [createResult, setCreateResult] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
 
@@ -69,7 +76,7 @@ export default function AdminPage() {
       const res = await fetch("/api/admin/coins", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ week: newWeek, rewardAmount: newReward }),
+        body: JSON.stringify({ week: newWeek, rewardAmount: newReward, bonusAmount: newBonus }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Failed to create code");
@@ -103,8 +110,13 @@ export default function AdminPage() {
     }
   }
 
-  async function handleBonus(code: string) {
-    if (!confirm(`Send 500 SCAV bonus for ${code}? Only do this after verifying their social post.`)) return;
+  async function handleBonus(code: string, amount: number) {
+    if (
+      !confirm(
+        `Send ${amount.toLocaleString()} SCAV bonus for ${code}? Only do this after verifying their social post.`
+      )
+    )
+      return;
     setBusyCode(code);
     setActionError(null);
     try {
@@ -187,14 +199,27 @@ export default function AdminPage() {
               className="mt-1 w-full rounded-md border border-ink/40 bg-bg/60 px-3 py-2 text-sm"
             />
           </label>
-          <label className="mb-4 block text-sm">
-            Reward amount (SCAV)
+          <label className="mb-3 block text-sm">
+            Reward amount (SCAV), paid on claim
             <input
               required
               type="number"
               min={1}
+              step={1}
               value={newReward}
               onChange={(e) => setNewReward(Number(e.target.value))}
+              className="mt-1 w-full rounded-md border border-ink/40 bg-bg/60 px-3 py-2 text-sm"
+            />
+          </label>
+          <label className="mb-4 block text-sm">
+            Bonus amount (SCAV), paid later from this page. 0 for no bonus.
+            <input
+              required
+              type="number"
+              min={0}
+              step={1}
+              value={newBonus}
+              onChange={(e) => setNewBonus(Number(e.target.value))}
               className="mt-1 w-full rounded-md border border-ink/40 bg-bg/60 px-3 py-2 text-sm"
             />
           </label>
@@ -242,7 +267,8 @@ export default function AdminPage() {
                     c.status === "claimed" &&
                     c.claimed_by !== "EXPIRED - no winner" &&
                     state.claimStatus === "confirmed" &&
-                    state.bonusStatus === "none";
+                    state.bonusStatus === "none" &&
+                    bonusFor(c) > 0;
 
                   return (
                     <tr
@@ -267,7 +293,10 @@ export default function AdminPage() {
                       </td>
                       <td className="p-3">{fmtDate(c.claimed_at)}</td>
                       <td className="p-3">
-                        {state.bonusStatus === "none" && <span className="text-ink/60">not sent</span>}
+                        <span className="mr-2">{bonusFor(c).toLocaleString()}</span>
+                        {state.bonusStatus === "none" && (
+                          <span className="text-ink/60">{bonusFor(c) > 0 ? "not sent" : "no bonus"}</span>
+                        )}
                         {state.bonusStatus === "pending" && <span className="text-accent">sending…</span>}
                         {state.bonusStatus === "sent" && (
                           <span className="text-ink/60" title={state.bonusSig ?? ""}>
@@ -293,7 +322,7 @@ export default function AdminPage() {
                           )}
                           {canBonus && (
                             <button
-                              onClick={() => handleBonus(c.code)}
+                              onClick={() => handleBonus(c.code, bonusFor(c))}
                               disabled={busyCode === c.code}
                               className="rounded border border-accent/40 px-2 py-1 text-accent hover:bg-accent/10 disabled:opacity-50"
                             >

@@ -21,7 +21,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  let body: { week?: string; rewardAmount?: number };
+  let body: { week?: string; rewardAmount?: number; bonusAmount?: number };
   try {
     body = await req.json();
   } catch {
@@ -30,12 +30,17 @@ export async function POST(req: NextRequest) {
 
   const week = body.week?.trim();
   const rewardAmount = body.rewardAmount ?? 500;
+  // 0 is allowed: it means "this code has no bonus".
+  const bonusAmount = body.bonusAmount ?? 500;
 
   if (!week) {
     return NextResponse.json({ error: "Missing week label" }, { status: 400 });
   }
-  if (!Number.isFinite(rewardAmount) || rewardAmount <= 0) {
+  if (!Number.isInteger(rewardAmount) || rewardAmount <= 0) {
     return NextResponse.json({ error: "Invalid reward amount" }, { status: 400 });
+  }
+  if (!Number.isInteger(bonusAmount) || bonusAmount < 0) {
+    return NextResponse.json({ error: "Invalid bonus amount" }, { status: 400 });
   }
 
   const code = randomBytes(5).toString("hex");
@@ -43,17 +48,20 @@ export async function POST(req: NextRequest) {
 
   const { data, error } = await supabase
     .from("coins")
-    .insert({ code, week, status: "unclaimed", reward_amount: rewardAmount })
+    .insert({ code, week, status: "unclaimed", reward_amount: rewardAmount, bonus_amount: bonusAmount })
     .select()
     .single();
 
   if (error) {
     console.error("Admin coin insert error:", error);
-    return NextResponse.json({ error: "Failed to create claim code" }, { status: 500 });
+    const hint = error.message?.includes("bonus_amount")
+      ? "The database is missing the 'bonus_amount' column. Run the coins bonus_amount SQL from docs/supabase-schema.sql in Supabase, then try again."
+      : "Failed to create claim code";
+    return NextResponse.json({ error: hint }, { status: 500 });
   }
 
   return NextResponse.json({
     coin: data,
-    claimUrl: `https://scavengercoin.com/claim?code=${code}`,
+    claimUrl: `https://www.scavengercoin.com/claim?code=${code}`,
   });
 }

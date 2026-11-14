@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PublicKey } from "@solana/web3.js";
 import { getSupabaseAdmin } from "@/lib/supabase";
-import { payoutScav } from "@/lib/solana";
+import { payoutScav, type PayoutResult } from "@/lib/solana";
 import { sendClaimNotification } from "@/lib/email";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
-// Half now, half after the finder's social post is verified via the admin bonus payout.
+// The payout waits for on-chain confirmation (up to ~50s, see lib/solana.ts).
+export const maxDuration = 60;
+
+// Fallback when a code has no reward_amount of its own. The bonus (paid later
+// from /admin once the finder's social post is verified) is set per code too.
 const DEFAULT_REWARD = 500;
 
 function logAttempt(
@@ -85,6 +89,13 @@ export async function POST(req: NextRequest) {
     logAttempt(supabase, { code, wallet: walletStr, success: false, error: "invalid_wallet" });
     return NextResponse.json({ error: "Invalid wallet address" }, { status: 400 });
   }
+  // A real wallet is always on the ed25519 curve. Anything else is a program
+  // address that can't own a normal token account: reject it before the code
+  // is touched instead of failing at payout time.
+  if (!PublicKey.isOnCurve(wallet.toBytes())) {
+    logAttempt(supabase, { code, wallet: walletStr, success: false, error: "invalid_wallet" });
+    return NextResponse.json({ error: "Invalid wallet address" }, { status: 400 });
+  }
 
   const { data: coin, error: fetchError } = await supabase
     .from("coins")
@@ -123,8 +134,34 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "This coin has already been claimed" }, { status: 409 });
   }
 
+  const rollBack = () =>
+    supabase
+      .from("coins")
+      .update({ status: "unclaimed", claimed_by: null, claimed_at: null, claim_tx: null })
+      .eq("code", code)
+      .eq("claimed_by", walletStr);
+
   const amount = coin.reward_amount ?? DEFAULT_REWARD;
-  const result = await payoutScav(wallet, amount);
+  let result: PayoutResult;
+  try {
+    result = await payoutScav(wallet, amount, {
+      // Record the signature as "pending review" before anything is broadcast.
+      // If this function dies mid-payout, the code is flagged in /admin with
+      // the signature to check, instead of sitting claimed with no trace.
+      onSigned: async (signature) => {
+        const { error } = await supabase
+          .from("coins")
+          .update({ claim_tx: `PENDING_REVIEW:${signature}` })
+          .eq("code", code);
+        if (error) throw new Error(`Could not record pending payout: ${error.message}`);
+      },
+    });
+  } catch (err) {
+    // payoutScav is written never to throw; if it somehow does, nothing was
+    // confirmed, so treat it like any other pre-send failure.
+    console.error("Unexpected payout error (code:", code, "):", err);
+    result = { status: "failed" };
+  }
 
   if (result.status === "confirmed") {
     await supabase.from("coins").update({ claim_tx: result.signature }).eq("code", code);
@@ -144,9 +181,10 @@ export async function POST(req: NextRequest) {
   }
 
   if (result.status === "uncertain") {
-    // The transfer may or may not have actually landed on-chain — retrying
+    // The transfer may or may not have actually landed on-chain. Retrying
     // automatically here risks paying out twice, so we deliberately do NOT
-    // roll the code back to unclaimed. Flag it for manual follow-up instead.
+    // roll the code back to unclaimed. It stays flagged PENDING_REVIEW (set in
+    // onSigned above; written again here in case that row was changed).
     await supabase
       .from("coins")
       .update({ claim_tx: `PENDING_REVIEW:${result.signature}` })
@@ -161,13 +199,11 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // result.status === "failed" — the transfer definitively never landed, so
-  // it's safe to roll back and let the finder retry.
+  // result.status === "failed": nothing was sent, or it landed and failed
+  // on-chain. Either way no SCAV moved, so roll the code back to unclaimed
+  // (clearing the pending marker too) and let the finder retry.
   console.error("Payout failed after claim was recorded (code:", code, ")");
-  await supabase
-    .from("coins")
-    .update({ status: "unclaimed", claimed_by: null, claimed_at: null })
-    .eq("code", code);
+  await rollBack();
   logAttempt(supabase, { code, wallet: walletStr, success: false, error: "payout_failed" });
   return NextResponse.json({ error: "Payout failed, please try again" }, { status: 500 });
 }

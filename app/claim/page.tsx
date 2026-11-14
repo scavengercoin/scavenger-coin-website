@@ -2,7 +2,9 @@
 
 import { Suspense, useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { WalletReadyState } from "@solana/wallet-adapter-base";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import confetti from "canvas-confetti";
@@ -31,8 +33,81 @@ function fireGoldConfetti() {
   );
 }
 
+const SUPPORT_EMAIL = "support@scavengercoin.com";
+
+// Shown when the browser has no wallet in it, which is the normal case for
+// someone who scanned the coin with their phone camera.
+function NoWalletHelp({ code }: { code: string }) {
+  // Built after mount: it needs the page's own address.
+  const [openInPhantom, setOpenInPhantom] = useState<string | null>(null);
+  useEffect(() => {
+    const id = setTimeout(() => {
+      const here = encodeURIComponent(window.location.href);
+      const origin = encodeURIComponent(window.location.origin);
+      setOpenInPhantom(`https://phantom.com/ul/browse/${here}?ref=${origin}`);
+    }, 0);
+    return () => clearTimeout(id);
+  }, []);
+
+  const mailto = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(`Help claiming coin ${code.toUpperCase()}`)}`;
+
+  return (
+    <div className="w-full max-w-sm rounded-xl border border-line bg-surface p-5 text-left">
+      <p className="text-base font-semibold text-ink">No wallet?</p>
+      <a
+        href="https://phantom.com/download"
+        target="_blank"
+        rel="noreferrer"
+        className="mt-3 block rounded-full bg-accent px-5 py-3 text-center text-sm font-semibold text-bg transition hover:brightness-110"
+      >
+        Get Phantom (2 min)
+      </a>
+      <ol className="mt-4 space-y-3 text-sm text-ink/70">
+        <li className="flex gap-3">
+          <span className="font-display text-xl leading-none text-accent">1</span>
+          <span>Install the free Phantom app and create a wallet.</span>
+        </li>
+        <li className="flex gap-3">
+          <span className="font-display text-xl leading-none text-accent">2</span>
+          <span>
+            Come back and{" "}
+            {openInPhantom ? (
+              <a href={openInPhantom} className="font-semibold text-accent underline underline-offset-2">
+                open this page in Phantom
+              </a>
+            ) : (
+              "open this page in Phantom"
+            )}
+            .
+          </span>
+        </li>
+        <li className="flex gap-3">
+          <span className="font-display text-xl leading-none text-accent">3</span>
+          <span>Tap Claim $SCAV. Your coins arrive in seconds.</span>
+        </li>
+      </ol>
+      <p className="mt-4 border-t border-line pt-4 text-xs text-ink/60">
+        Or email{" "}
+        <a href={mailto} className="text-accent underline underline-offset-2">
+          {SUPPORT_EMAIL}
+        </a>{" "}
+        with your code and we&apos;ll help.
+      </p>
+    </div>
+  );
+}
+
 function ClaimFlow({ code }: { code: string }) {
-  const { publicKey, connected } = useWallet();
+  const { publicKey, connected, wallets } = useWallet();
+  // Wallet extensions and in-app browsers announce themselves a moment after
+  // the page loads, so wait a beat before deciding there's no wallet here.
+  const [walletCheckDone, setWalletCheckDone] = useState(false);
+  useEffect(() => {
+    const id = setTimeout(() => setWalletCheckDone(true), 1200);
+    return () => clearTimeout(id);
+  }, []);
+  const walletDetected = wallets.some((w) => w.readyState === WalletReadyState.Installed);
+  const showNoWalletHelp = !connected && walletCheckDone && !walletDetected;
   const [lookup, setLookup] = useState<Lookup>(() =>
     code ? { state: "checking" } : { state: "no-code" }
   );
@@ -193,6 +268,8 @@ function ClaimFlow({ code }: { code: string }) {
         <p className="max-w-xs text-sm text-red-400">{result.message}</p>
       )}
 
+      {showNoWalletHelp && <NoWalletHelp code={code} />}
+
       <InfoPanel />
     </div>
   );
@@ -212,6 +289,11 @@ export default function ClaimPage() {
       <Suspense fallback={null}>
         <ClaimFlowRoute />
       </Suspense>
+      <footer className="mt-12 text-center text-xs text-ink/60">
+        <Link href="/rules" className="underline-offset-2 transition hover:text-accent hover:underline">
+          Official Rules
+        </Link>
+      </footer>
     </main>
   );
 }

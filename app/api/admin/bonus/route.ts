@@ -4,7 +4,11 @@ import { getSupabaseAdmin } from "@/lib/supabase";
 import { payoutScav } from "@/lib/solana";
 import { parseClaimTx, withBonusPending, withBonusSent, withBonusPendingReview } from "@/lib/claim-status";
 
-const BONUS_AMOUNT = 500;
+// The payout waits for on-chain confirmation (up to ~50s, see lib/solana.ts).
+export const maxDuration = 60;
+
+// Fallback for codes created before bonus_amount existed (or left blank).
+const DEFAULT_BONUS = 500;
 
 function logBonus(
   supabase: ReturnType<typeof getSupabaseAdmin>,
@@ -60,6 +64,11 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const bonusAmount = Number(coin.bonus_amount ?? DEFAULT_BONUS);
+  if (!Number.isFinite(bonusAmount) || bonusAmount <= 0) {
+    return NextResponse.json({ error: "This code has no bonus to send" }, { status: 400 });
+  }
+
   let wallet: PublicKey;
   try {
     wallet = new PublicKey(coin.claimed_by);
@@ -84,7 +93,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Bonus already being processed for this code" }, { status: 409 });
   }
 
-  const result = await payoutScav(wallet, BONUS_AMOUNT);
+  const result = await payoutScav(wallet, bonusAmount, {
+    // Same safety net as the claim payout: put the signature on record as
+    // "needs review" before broadcasting, so a killed function can't leave
+    // the bonus stuck on "sending" with nothing to check.
+    onSigned: async (signature) => {
+      const { error } = await supabase
+        .from("coins")
+        .update({ claim_tx: withBonusPendingReview(coin.claim_tx as string, signature) })
+        .eq("code", code);
+      if (error) throw new Error(`Could not record pending bonus: ${error.message}`);
+    },
+  });
 
   if (result.status === "confirmed") {
     await supabase
@@ -92,7 +112,7 @@ export async function POST(req: NextRequest) {
       .update({ claim_tx: withBonusSent(coin.claim_tx as string, result.signature) })
       .eq("code", code);
     logBonus(supabase, { code, wallet: coin.claimed_by, success: true, note: result.signature });
-    return NextResponse.json({ success: true, amount: BONUS_AMOUNT, txSignature: result.signature });
+    return NextResponse.json({ success: true, amount: bonusAmount, txSignature: result.signature });
   }
 
   if (result.status === "uncertain") {
