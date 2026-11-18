@@ -124,10 +124,27 @@ export default function Home() {
               {currentHunt.neighborhood}
             </p>
 
-            <p className="mb-3 text-xs uppercase tracking-widest text-ink/60">
-              Coin drops in
-            </p>
-            <CountdownTimer dropsAt={currentHunt.dropsAt} />
+            {currentHunt.status === "ACTIVE" ? (
+              <>
+                <p className="mb-3 text-xs uppercase tracking-widest text-ink/60">
+                  Right now
+                </p>
+                <p className="font-display flex items-center gap-3 text-3xl leading-tight text-accent sm:text-4xl">
+                  <span aria-hidden className="relative flex h-3 w-3 shrink-0">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-60" />
+                    <span className="relative inline-flex h-3 w-3 rounded-full bg-accent" />
+                  </span>
+                  Hunt #{currentHunt.huntNumber} is live, {currentHunt.location}
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="mb-3 text-xs uppercase tracking-widest text-ink/60">
+                  Coin drops in
+                </p>
+                <CountdownTimer dropsAt={currentHunt.dropsAt} />
+              </>
+            )}
           </div>
         </section>
       </FadeIn>
